@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Subir Archivo Excel";
+
+}
+
+<h2>Subir Archivo Excel</h2>
+
+<form asp-action="Upload" asp-controller="Home" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label for="file">Seleccionar archivo Excel:</label>
+        <input type="file" name="file" class="form-control" accept=".xls,.xlsx" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Subir</button>
+</form>
+
+<div id="progressContainer">
+    <div id="progressBar" style="width: 0%; height: 30px; background-color: green;"></div>
+</div>
+<p id="progressText">Progreso: 0%</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.9/signalr.min.js"></script>
+<script type="text/javascript">// Conectar a SignalR
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/progressHub")
+        .build();
+
+    // Manejar los mensajes de progreso desde el servidor
+    connection.on("ReceiveProgress", function (porcentaje) {
+        // Actualizar la barra de progreso
+        document.getElementById("progressBar").style.width = porcentaje + "%";
+        document.getElementById("progressText").innerText = "Progreso: " + porcentaje + "%";
+    });
+
+    // Iniciar la conexión
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });</script>
+
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info">
+        @ViewBag.Message
+    </div>
+}
