@@ -35,6 +35,8 @@ namespace FacturacionSimple.Models
         [NotMapped]
         public string EntidadTexto { get; set; }
 
+        public int EntidadCodigo { get; set; }
+
         public Entidad Entidad { get; set; }
 
     }

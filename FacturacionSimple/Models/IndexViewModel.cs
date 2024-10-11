@@ -11,6 +11,7 @@ namespace FacturacionSimple
 		{
 		}
 
+        //General
         public List<Boleta> ListadoBoletas { get; set; }
 		public int CantidadBoletasProceadas { get; set; }
         public int CantidadBoletasConPagos { get; set; }
@@ -19,9 +20,14 @@ namespace FacturacionSimple
         public Dictionary<string, int> CantidadBoletasDiaLastPeriod { get; set; }
         public double PromedioBoletaUltimoMesGeneral { get; set; }
 
-
+        public List<SaldosMensuales> SaldosHistoricosPublicos {get;set;}
+        public List<SaldosMensuales> SaldosHistoricosPrivados {get;set;}
        
         public Dictionary<string,int> EdadPacientes { get; set; }
+
+        public Dictionary<string,int> BoletasPorEntidadGeneral { get; set; }
+
+        public Dictionary<string,int> BoletasPorEntidadLastPeriod { get; set; }
 
         public int LastPeriod {get;set;}
         public int LastYear {get;set;}
@@ -29,7 +35,6 @@ namespace FacturacionSimple
         //Publico
 		public int CantidadBoletasPublicas { get; set; }
         
-        public List<SaldosMensuales> SaldosMensualesPublico { get; set;}
         public Dictionary<DateTime,int> CantidadBoletasMensualesPublico { get; set;}
 
         public double PromedioBoletaUltimoMesPublico { get; set; }
@@ -50,8 +55,6 @@ namespace FacturacionSimple
 
         public int CantidadBoletasPrivadas { get; set; }
         
-        public List<SaldosMensuales> SaldosMensualesPrivados { get; set;}
-
         public double PromedioBoletaUltimoMesPrivados { get; set; }
         
         public double BoletaMenorValorU3MPrivados { get; set; }

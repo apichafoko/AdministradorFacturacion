@@ -99,6 +99,9 @@ namespace FacturacionSimple.Helpers
                             };
 
                             lBoleta.Entidad = lEntidad;
+                            lBoleta.EntidadCodigo = lEntidad.Codigo;
+                            lBoleta.EntidadTexto = lEntidad.Nombre;
+
 
                             // Intentar parsear la fecha de forma flexible
                             DateTime fechaBoleta;
@@ -172,13 +175,20 @@ namespace FacturacionSimple.Helpers
                     ImporteCobradoBruto = g.Sum(y => y.Cobrado),
                     ImporteDebitadoBruto = g.Sum(y => y.Debitado),
                     ImportePendiente = g.Sum(y => y.Facturado) - (g.Sum(y => y.Cobrado) + g.Sum(y => y.Debitado)),
-                    PorcentajeCobrado = g.Sum(y => y.Facturado) != 0
-                        ? (g.Sum(y => y.Cobrado) >= g.Sum(y => y.Facturado)
-                            ? 100
-                            : (int)(((g.Sum(y => y.Cobrado) + g.Sum(y => y.Debitado)) / g.Sum(y => y.Facturado)) * 100))
-                        : 0
                 })
                 .ToList();
+
+            foreach (var saldo in lSaldosMensuales)
+            {
+                saldo.ImportePendiente = saldo.ImporteFacturadoBruto - (saldo.ImporteCobradoBruto + saldo.ImporteDebitadoBruto);
+
+                saldo.PorcentajeCobrado = Math.Round((saldo.ImporteCobradoBruto + saldo.ImporteDebitadoBruto) / saldo.ImporteFacturadoBruto * 100, 2);
+
+                if (saldo.PorcentajeCobrado > 100)
+                {
+                    saldo.PorcentajeCobrado = 100;
+                }
+            }
 
 
             return lSaldosMensuales;
@@ -227,66 +237,191 @@ namespace FacturacionSimple.Helpers
             return lReturn;
         }
 
+
+
         public List<MontosPorPeriodo> GetMontosPorPeriodo(IEnumerable<Boleta> boletas, int lastYear, int lastMonth)
         {
-            var cutoffDate = new DateTime(lastYear, lastMonth, 1).AddMonths(-4);
+            int[] EntidadesMes1 = { 96, 313, 66 };
+            int[] EntidadesMes3 = { 500, 968, 847, 909 };
+
+            var cutoffDate = new DateTime(lastYear, lastMonth, 1).AddMonths(-5);
 
             var boletasSinPago = boletas
                 .Where(b => b.Cobrado == 0 &&
                     new DateTime(b.PeriodoAnio, b.PeriodoMes, 1) >= cutoffDate)
                 .ToList();
 
-
-            var boletasPorEntidad = boletasSinPago.GroupBy(b => b.Entidad).ToList();
+            var boletasPorPeriodo = boletasSinPago
+                .GroupBy(b => new { b.PeriodoAnio, b.PeriodoMes })
+                .ToList();
 
             var montosPorPeriodos = new List<MontosPorPeriodo>();
 
-            foreach (var grupo in boletasPorEntidad)
+            foreach (var periodoGrupo in boletasPorPeriodo)
             {
-                foreach (var boleta in grupo)
+                var boletaslistado = periodoGrupo.ToList();
+
+                #region 1Mes
+                var boletas1Mes = boletaslistado.Where(b => EntidadesMes1.Contains(b.EntidadCodigo));
+
+                if (boletas1Mes.Count() > 0)
                 {
-
-                    var tempDate = new DateTime(boleta.PeriodoAnio, boleta.PeriodoMes, 1);
-
-                    var montosPorPeriodo = new MontosPorPeriodo();
-
-                    if (new[] { 96, 313, 66 }.Contains(boleta.Entidad.Codigo))
+                     var montosPorPeriodo = montosPorPeriodos.FirstOrDefault(m => m.Periodo == $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 1:D2}");
+                    if (montosPorPeriodo == null)
                     {
-                        tempDate = tempDate.AddMonths(1);
-                        montosPorPeriodo.Periodo = $"{tempDate:yyyy - MM}";
-
-                    }
-                    else if (new[] { 500, 968, 847, 909 }.Contains(boleta.Entidad.Codigo))
-                    {
-                        tempDate = tempDate.AddMonths(3);
-                        montosPorPeriodo.Periodo = $"{tempDate:yyyy - MM}";
-                    }
-                    else
-                    {
-                        tempDate = tempDate.AddMonths(2);
-                        montosPorPeriodo.Periodo = $"{tempDate:yyyy - MM}";
-                    }
-
-                    var clave = $"{boleta.Entidad.Codigo} - {boleta.Entidad.Nombre}";
-                    if (montosPorPeriodo.MontosPorEntidad == null)
-                    {
+                        montosPorPeriodo = new MontosPorPeriodo();
+                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 1:D2}";
                         montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
+                        montosPorPeriodos.Add(montosPorPeriodo);
                     }
 
-                    if (montosPorPeriodo.MontosPorEntidad.ContainsKey(clave))
+                    foreach (var boleta in periodoGrupo.Where(b => EntidadesMes1.Contains(b.EntidadCodigo)))
                     {
-                        montosPorPeriodo.MontosPorEntidad[clave] += boleta.Facturado;
-                    }
-                    else
-                    {
-                        montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
+                        var clave = $"{boleta.Entidad.Codigo} - {boleta.Entidad.Nombre}";
+
+                        if (montosPorPeriodo.MontosPorEntidad.ContainsKey(clave))
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] += boleta.Facturado;
+                        }
+                        else
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
+                        }
                     }
 
-                    montosPorPeriodos.Add(montosPorPeriodo);
                 }
+
+                #endregion
+
+                #region 2Meses
+                var boletas2Meses = boletaslistado.Where(b => !EntidadesMes1.Contains(b.EntidadCodigo) && !EntidadesMes3.Contains(b.EntidadCodigo));
+
+                if (boletas2Meses.Count() > 0)
+                {
+                    var montosPorPeriodo = montosPorPeriodos.FirstOrDefault(m => m.Periodo == $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 2:D2}");
+                    if (montosPorPeriodo == null)
+                    {
+                        montosPorPeriodo = new MontosPorPeriodo();
+                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 2:D2}";
+                        montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
+                        montosPorPeriodos.Add(montosPorPeriodo);
+                    }
+
+
+                    foreach (var boleta in periodoGrupo.Where(b => !EntidadesMes1.Contains(b.EntidadCodigo) && !EntidadesMes3.Contains(b.EntidadCodigo)))
+                    {
+                        var clave = $"{boleta.Entidad.Codigo} - {boleta.Entidad.Nombre}";
+
+                        if (montosPorPeriodo.MontosPorEntidad.ContainsKey(clave))
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] += boleta.Facturado;
+                        }
+                        else
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
+                        }
+                    }
+
+                }
+
+                #endregion
+
+                #region 3Meseses
+                var boletas3Meses = boletaslistado.Where(b => EntidadesMes3.Contains(b.EntidadCodigo));
+
+                if (boletas3Meses.Count() > 0)
+                {
+                    var montosPorPeriodo = montosPorPeriodos.FirstOrDefault(m => m.Periodo == $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 3:D2}");
+                    if (montosPorPeriodo == null)
+                    {
+                        montosPorPeriodo = new MontosPorPeriodo();
+                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 3:D2}";
+                        montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
+                        montosPorPeriodos.Add(montosPorPeriodo);
+                    }
+
+                    foreach (var boleta in periodoGrupo.Where(b => EntidadesMes3.Contains(b.EntidadCodigo)))
+                    {
+                        var clave = $"{boleta.Entidad.Codigo} - {boleta.Entidad.Nombre}";
+
+                        if (montosPorPeriodo.MontosPorEntidad.ContainsKey(clave))
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] += boleta.Facturado;
+                        }
+                        else
+                        {
+                            montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
+                        }
+                    }
+
+                }
+
+                #endregion
+
+
+
+            }
+
+            // Ordenar los MontosPorEntidad por el valor dentro de cada periodo
+            foreach (var montosPorPeriodo in montosPorPeriodos)
+            {
+                montosPorPeriodo.MontosPorEntidad = montosPorPeriodo.MontosPorEntidad
+                    .OrderByDescending(kv => kv.Value)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value);
             }
 
             return montosPorPeriodos;
+        }
+    
+    
+        public Dictionary<string,int> GetEdadesPromedio(List<Boleta> Listado)
+        {
+            var gruposEtarios = new Dictionary<string, int>
+            {
+                { "0 a 15 años", 0 },
+                { "16 a 30 años", 0 },
+                { "31 a 50 años", 0 },
+                { "51 a 65 años", 0 },
+                { "66 a 75 años", 0 },
+                { "76 a 90 años", 0 },
+                { "mayores de 90 años", 0 }
+            };
+
+            foreach (var boleta in Listado)
+            {
+                if (boleta.Edad <= 15)
+                {
+                    gruposEtarios["0 a 15 años"]++;
+                }
+                else if (boleta.Edad <= 30)
+                {
+                    gruposEtarios["16 a 30 años"]++;
+                }
+                else if (boleta.Edad <= 50)
+                {
+                    gruposEtarios["31 a 50 años"]++;
+                }
+                else if (boleta.Edad <= 65)
+                {
+                    gruposEtarios["51 a 65 años"]++;
+                }
+                else if (boleta.Edad <= 75)
+                {
+                    gruposEtarios["66 a 75 años"]++;
+                }
+                else if (boleta.Edad <= 90)
+                {
+                    gruposEtarios["76 a 90 años"]++;
+                }
+                else
+                {
+                    gruposEtarios["mayores de 90 años"]++;
+                }
+            }
+
+            return gruposEtarios;
+
+
         }
     }
 }

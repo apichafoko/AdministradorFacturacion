@@ -15,7 +15,7 @@ namespace FacturacionSimple.Helpers
         public Double ImporteDebitadoBruto { get; set; }
         public Double ImporteCobradoBruto { get; set; }
 
-		public int PorcentajeCobrado { get; set; }
+		public double PorcentajeCobrado { get; set; }
 
     }
 
