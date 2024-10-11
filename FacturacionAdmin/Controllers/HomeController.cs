@@ -66,9 +66,14 @@ public class HomeController : Controller
 
 
             // Llamar al procesador de boletas para leer y procesar el archivo
-            await _boletaProcessor.ProcesarArchivo(filePath, Convert.ToInt32(User.Identity.Name));
+            //await _boletaProcessor.ProcesarArchivo(filePath, Convert.ToInt32(User.Identity.Name));
+            var boletas = await _boletaProcessor.ProcesarArchivo(filePath);
 
+            ViewBag.Boletas = boletas;
             ViewBag.Message = "Archivo subido exitosamente.";
+
+
+
         }
         catch (Exception ex)
         {

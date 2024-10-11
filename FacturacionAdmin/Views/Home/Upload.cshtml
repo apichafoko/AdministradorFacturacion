@@ -3,6 +3,9 @@
 
 }
 
+@model IndexViewModel
+
+
 <h2>Subir Archivo Excel</h2>
 
 <form asp-action="Upload" asp-controller="Home" enctype="multipart/form-data" method="post">
@@ -16,6 +19,29 @@
 <div id="progressContainer">
     <div id="progressBar" style="width: 0%; height: 30px; background-color: green;"></div>
 </div>
+
+@if (Model.ListadoBoletas != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Propiedad1</th>
+                <th>Propiedad2</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ListadoBoletas)
+            {
+                <tr>
+                    <!--<td>item.Propiedad1</td>-->
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
 <p id="progressText">Progreso: 0%</p>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.9/signalr.min.js"></script>
 <script type="text/javascript">// Conectar a SignalR

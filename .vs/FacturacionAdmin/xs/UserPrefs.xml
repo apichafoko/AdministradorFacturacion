@@ -1,0 +1,36 @@
+﻿<Properties StartupConfiguration="{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}|https">
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionAdmin/Helpers/BoletaProcessor.cs" relfile="FacturacionAdmin/Helpers/BoletaProcessor.cs" line="138" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="FacturacionSimple/Helpers/BoletaProcessor.cs">
+    <Files>
+      <File FileName="FacturacionAdmin/Program.cs" Line="49" Column="1" />
+      <File FileName="FacturacionSimple/Program.cs" Line="12" Column="1" />
+      <File FileName="FacturacionSimple/Views/Home/Index.cshtml" Line="129" Column="17" />
+      <File FileName="FacturacionSimple/Controllers/HomeController.cs" Line="72" Column="13" />
+      <File FileName="FacturacionSimple/Models/IndexViewModel.cs" Line="37" Column="34" />
+      <File FileName="FacturacionSimple/Helpers/BoletaProcessor.cs" Line="111" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="FacturacionAdmin" expanded="True">
+            <Node name="FacturacionSimple">
+              <Node name="Helpers" expanded="True">
+                <Node name="BoletaProcessor.cs" selected="True" />
+              </Node>
+              <Node name="Models" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.FacturacionSimple PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.ItemProperties.FacturacionAdmin PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

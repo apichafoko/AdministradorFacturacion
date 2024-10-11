@@ -5,6 +5,8 @@ VisualStudioVersion = 25.0.1706.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacturacionAdmin", "FacturacionAdmin\FacturacionAdmin.csproj", "{5FDCDB8E-DCB1-4D9A-83D6-E0D4FB4D014E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacturacionSimple", "FacturacionSimple\FacturacionSimple.csproj", "{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5FDCDB8E-DCB1-4D9A-83D6-E0D4FB4D014E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FDCDB8E-DCB1-4D9A-83D6-E0D4FB4D014E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FDCDB8E-DCB1-4D9A-83D6-E0D4FB4D014E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AA2543F-24EA-4B7C-B5C2-096BBB9E9DCB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

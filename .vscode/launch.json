@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "type": "coreclr",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/FacturacionAdmin/bin/Debug/netcoreapp3.1/${input:executableName}.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/FacturacionAdmin",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ],
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "executableName",
+            "description": "Name of your executable"
+        }
+    ]
+}

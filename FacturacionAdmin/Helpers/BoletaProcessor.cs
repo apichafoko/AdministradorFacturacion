@@ -21,6 +21,44 @@ namespace FacturacionAdmin.Helpers
 
         }
 
+        public async Task<List<Boleta>> ProcesarArchivo(string filePath)
+        {
+            var boletas = LeerBoletasDesdeArchivo(filePath);
+
+            int totalBoletas = boletas.Count;
+            int processedBoletas = 0;
+
+
+            try
+            {
+                foreach (var boleta in boletas)
+                {
+                    // Incrementar boletas procesadas
+                    processedBoletas++;
+
+                    // Calcular el porcentaje de progreso
+                    var porcentaje = (processedBoletas * 100) / totalBoletas;
+
+                    // Enviar actualización de progreso al cliente
+                    await _hubContext.Clients.All.SendAsync("ReceiveProgress", porcentaje);
+
+                }
+
+                // Enviar notificación de que el proceso ha terminado
+                await _hubContext.Clients.All.SendAsync("ReceiveProgress", 100);
+                return boletas;
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, revertir la transacción
+                // Enviar notificación de que el proceso ha terminado
+                await _hubContext.Clients.All.SendAsync("ReceiveProgress", 100);
+                throw; // Volver a lanzar la excepción para manejarla si es necesario
+            }
+
+        }
+
+
         public async Task ProcesarArchivo(string filePath, int IdProfesional)
         {
             var boletas = LeerBoletasDesdeArchivo(filePath, IdProfesional);
@@ -57,7 +95,7 @@ namespace FacturacionAdmin.Helpers
                             if (!SonIguales(boletaExistente, boleta))
                             {
                                 // Asegúrate de no modificar el `Id`
-                                
+
                                 boletaExistente.Cirujano = boleta.Cirujano;
                                 boletaExistente.Gravado = boleta.Gravado;
                                 boletaExistente.Hospital = boleta.Hospital;
@@ -130,7 +168,7 @@ namespace FacturacionAdmin.Helpers
                             lBoleta.IdProfesional = IdProfesional;
 
 
-                                // Intentar parsear la fecha de forma flexible
+                            // Intentar parsear la fecha de forma flexible
                             DateTime fechaBoleta;
                             if (DateTime.TryParse(reader.GetValue(3)?.ToString(), out fechaBoleta))
                             {
@@ -152,6 +190,57 @@ namespace FacturacionAdmin.Helpers
 
             return boletas;
         }
+
+
+        private List<Boleta> LeerBoletasDesdeArchivo(string filePath)
+        {
+            var boletas = new List<Boleta>();
+
+            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    // Leer el archivo fila por fila
+                    while (reader.Read())
+                    {
+                        if (reader.Depth > 2) // Saltar la cabecera
+                        {
+                            var lBoleta = new Boleta();
+
+                            lBoleta.NumeroBoleta = Convert.ToInt64(reader.GetValue(1));
+                            lBoleta.EntidadTexto = reader.GetValue(2)?.ToString();
+                            lBoleta.Periodo = reader.GetValue(4)?.ToString();
+                            lBoleta.Hospital = reader.GetValue(5)?.ToString();
+                            lBoleta.Edad = Convert.ToInt32(reader.GetValue(8)?.ToString());
+                            lBoleta.Facturado = reader.GetValue(10) != null ? Convert.ToDecimal(reader.GetValue(10)) : 0;
+                            lBoleta.Cobrado = reader.GetValue(11) != null ? Convert.ToDecimal(reader.GetValue(11)) : 0;
+                            lBoleta.Debitado = reader.GetValue(12) != null ? Convert.ToDecimal(reader.GetValue(12)) : 0;
+                            lBoleta.Saldo = lBoleta.Facturado - (lBoleta.Cobrado + lBoleta.Debitado);
+
+
+                            // Intentar parsear la fecha de forma flexible
+                            DateTime fechaBoleta;
+                            if (DateTime.TryParse(reader.GetValue(3)?.ToString(), out fechaBoleta))
+                            {
+                                lBoleta.Fecha = fechaBoleta;
+                                lBoleta.Fecha = lBoleta.Fecha.ToUniversalTime();
+                            }
+                            else
+                            {
+                                // Manejar el error de fecha (puedes optar por lanzar una excepción personalizada si lo deseas)
+                                throw new FormatException($"La fecha '{reader.GetValue(3)?.ToString()}' no es válida.");
+                            }
+
+
+                            boletas.Add(lBoleta);
+                        }
+                    }
+                }
+            }
+
+            return boletas;
+        }
+
 
         private bool SonIguales(Boleta boletaExistente, Boleta nuevaBoleta)
         {

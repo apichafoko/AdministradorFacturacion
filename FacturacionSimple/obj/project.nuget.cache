@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "dgSpecHash": "d3WI8vdd8Zo=",
+  "success": true,
+  "projectFilePath": "/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/FacturacionSimple.csproj",
+  "expectedPackageFiles": [
+    "/Users/urielfraidenraij_1/.nuget/packages/bouncycastle.cryptography/2.4.0/bouncycastle.cryptography.2.4.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/enums.net/4.0.1/enums.net.4.0.1.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/exceldatareader/3.7.0/exceldatareader.3.7.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/extendednumerics.bigdecimal/2025.1001.2.129/extendednumerics.bigdecimal.2025.1001.2.129.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/itextsharp/5.5.13.4/itextsharp.5.5.13.4.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/mathnet.numerics.signed/5.0.0/mathnet.numerics.signed.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.aspnetcore.mvc.razor.extensions/6.0.0/microsoft.aspnetcore.mvc.razor.extensions.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.aspnetcore.mvc.razor.runtimecompilation/8.0.10/microsoft.aspnetcore.mvc.razor.runtimecompilation.8.0.10.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.aspnetcore.razor.language/6.0.0/microsoft.aspnetcore.razor.language.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.codeanalysis.analyzers/3.3.2/microsoft.codeanalysis.analyzers.3.3.2.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.codeanalysis.common/4.0.0/microsoft.codeanalysis.common.4.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.codeanalysis.csharp/4.0.0/microsoft.codeanalysis.csharp.4.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.codeanalysis.razor/6.0.0/microsoft.codeanalysis.razor.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.extensions.dependencymodel/8.0.2/microsoft.extensions.dependencymodel.8.0.2.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.io.recyclablememorystream/3.0.0/microsoft.io.recyclablememorystream.3.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.netcore.platforms/5.0.0/microsoft.netcore.platforms.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/microsoft.win32.systemevents/6.0.0/microsoft.win32.systemevents.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/npoi/2.7.1/npoi.2.7.1.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/sharpziplib/1.4.2/sharpziplib.1.4.2.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/sixlabors.fonts/1.0.1/sixlabors.fonts.1.0.1.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/sixlabors.imagesharp/2.1.8/sixlabors.imagesharp.2.1.8.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.collections.immutable/5.0.0/system.collections.immutable.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.configuration.configurationmanager/6.0.0/system.configuration.configurationmanager.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.drawing.common/6.0.0/system.drawing.common.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.formats.asn1/6.0.0/system.formats.asn1.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.memory/4.5.4/system.memory.4.5.4.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.reflection.metadata/5.0.0/system.reflection.metadata.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.security.accesscontrol/6.0.0/system.security.accesscontrol.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.security.cryptography.pkcs/6.0.3/system.security.cryptography.pkcs.6.0.3.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.security.cryptography.protecteddata/6.0.0/system.security.cryptography.protecteddata.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.security.cryptography.xml/6.0.1/system.security.cryptography.xml.6.0.1.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.security.permissions/6.0.0/system.security.permissions.6.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.text.encoding.codepages/5.0.0/system.text.encoding.codepages.5.0.0.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512",
+    "/Users/urielfraidenraij_1/.nuget/packages/system.windows.extensions/6.0.0/system.windows.extensions.6.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"iTextSharp 5.5.13.4\" se restauró con \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\" en lugar de la plataforma de destino del proyecto \"net8.0\". Puede que el paquete no sea totalmente compatible con el proyecto.",
+      "libraryId": "iTextSharp",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}
