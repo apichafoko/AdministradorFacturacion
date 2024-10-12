@@ -75,6 +75,7 @@ namespace FacturacionSimple.Helpers
 
                             lBoleta.Hospital = reader.GetValue(5)?.ToString();
                             lBoleta.Edad = Convert.ToInt32(reader.GetValue(8)?.ToString());
+                            lBoleta.Cirujano = reader.GetValue(9)?.ToString();
                             lBoleta.Facturado = reader.GetValue(10) != null ? Convert.ToDouble(reader.GetValue(10).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
                             lBoleta.Cobrado = reader.GetValue(11) != null ? Convert.ToDouble(reader.GetValue(11).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
                             lBoleta.Debitado = reader.GetValue(12) != null ? Convert.ToDouble(reader.GetValue(12).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
@@ -96,16 +97,30 @@ namespace FacturacionSimple.Helpers
 
                             // Intentar parsear la fecha de forma flexible
                             DateTime fechaBoleta;
-                            if (DateTime.TryParse(reader.GetValue(3)?.ToString(), out fechaBoleta))
+                            var fechaParts = reader.GetValue(3)?.ToString().Split('/');
+                            var dia = fechaParts[0];
+                            var mes = fechaParts[1];
+                            var anio = fechaParts[2].Substring(0, 4);
+
+                            if (int.TryParse(dia, out int diaInt) && diaInt < 10)
                             {
-                                lBoleta.Fecha = fechaBoleta;
-                                lBoleta.Fecha = DateTime.ParseExact(fechaBoleta.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture).ToUniversalTime();
+                                // Si el día es menor a 10, el formato es MM/dd/yyyy
+                                mes = fechaParts[0];
+                                dia = fechaParts[1];
                             }
-                            else
+
+                            try
+                            {
+                                lBoleta.Fecha = new DateTime(Convert.ToInt32(anio), Convert.ToInt32(mes), Convert.ToInt32(dia));
+
+                            }
+                            catch (Exception ex)
                             {
                                 // Manejar el error de fecha (puedes optar por lanzar una excepción personalizada si lo deseas)
-                                throw new FormatException($"La fecha '{reader.GetValue(3)?.ToString()}' no es válida.");
+                                throw new FormatException($"La fecha '{dia}/{mes}/{anio}' no es válida.");
                             }
+
+
 
                             boletas.Add(lBoleta);
                         }
@@ -383,24 +398,45 @@ namespace FacturacionSimple.Helpers
 
             return gruposEtarios;
         }
-    
-        public Dictionary<DateTime,double> GetFacturacionenUSD(List<SaldosMensuales> Listado, Dictionary<DateTime,double> Cotizaciones)
-        {
-        
-        var facturacionEnUSD = new Dictionary<DateTime, double>();
 
-        foreach (var saldo in Listado)
+        public Dictionary<DateTime, double> GetFacturacionenUSD(List<SaldosMensuales> Listado, Dictionary<DateTime, double> Cotizaciones)
         {
-            var periodo = DateTime.ParseExact(saldo.Periodo, "yyyy - MM", CultureInfo.InvariantCulture);
-            if (Cotizaciones.TryGetValue(periodo, out var cotizacion))
+
+            var facturacionEnUSD = new Dictionary<DateTime, double>();
+
+            foreach (var saldo in Listado)
             {
-                facturacionEnUSD[periodo] = saldo.ImporteFacturadoBruto / cotizacion;
+                var periodo = DateTime.ParseExact(saldo.Periodo, "yyyy - MM", CultureInfo.InvariantCulture);
+                if (Cotizaciones.TryGetValue(periodo, out var cotizacion))
+                {
+                    facturacionEnUSD[periodo] = saldo.ImporteFacturadoBruto / cotizacion;
+                }
             }
+
+            return facturacionEnUSD;
+
         }
 
-        return facturacionEnUSD;
+        public Dictionary<string, int> GetCantidadBoletasPorCirujano(List<Boleta> boletas)
+        {
+            var boletasPorCirujano = boletas
+                .Where(b => b.Cirujano != null)
+                .GroupBy(b => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(b.Cirujano!.ToLowerInvariant()))
+                .OrderByDescending(g => g.Count())
+                .ToDictionary(g => g.Key, g => g.Count());
 
+            return boletasPorCirujano;
         }
-    
+
+        public Dictionary<string, int> GetCantidadBoletasPorHospital(List<Boleta> boletas)
+        {
+            var boletasPorHospital = boletas
+                .Where(b => b.Hospital != null)
+                .GroupBy(b => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(b.Hospital!.ToLowerInvariant()))
+                .OrderByDescending(g => g.Count())
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return boletasPorHospital;
+        }
     }
 }

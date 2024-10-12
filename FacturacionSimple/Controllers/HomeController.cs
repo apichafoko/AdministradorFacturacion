@@ -51,6 +51,8 @@ public class HomeController : Controller
         // Obtiene las entidades públicas
         var lEntidadesPublicas = _Entidades.GetEntidadesPublicas(lEntidades);
 
+        
+
         // Obtiene el último periodo de las boletas
         var lastPeriod = boletas.OrderByDescending(s => DateTime.Parse(s.Periodo)).First();
 
@@ -104,6 +106,14 @@ public class HomeController : Controller
             boletas.Where(b => lEntidadesPublicas.Any(e => e.Codigo == b.Entidad.Codigo) &&
                    b.PeriodoAnio == lastYear &&
                    b.PeriodoMes == lastMonth).ToList());
+
+
+        var x = boletas
+            .Where(b => lEntidadesPublicas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                        b.PeriodoAnio == lastYear &&
+                        b.PeriodoMes == lastMonth &&
+                        b.Fecha.DayOfWeek == DayOfWeek.Monday)
+            .ToList();
 
         lViewModel.CantidadBoletasDiaPrivado = _boletaProcessor.CantidadBoletasDiaSemana(
             boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
@@ -270,9 +280,17 @@ public class HomeController : Controller
 
         // Obtiene y asigna los montos próximos a cobrar privado al ViewModel
         lViewModel.MontosProximosACobrarPrivado = _boletaProcessor.GetMontosPorPeriodo(boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo)).ToList(), lastYear, lastMonth);
-    
 
-        
+        lViewModel.CantidadBoletasPorCirujanoPrivados = _boletaProcessor.GetCantidadBoletasPorCirujano(
+            boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                       b.PeriodoAnio == lastYear &&
+                       b.PeriodoMes == lastMonth).ToList());
+
+        lViewModel.CantidadBoletasPorHospitalPrivados = _boletaProcessor.GetCantidadBoletasPorHospital(
+            boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                       b.PeriodoAnio == lastYear &&
+                       b.PeriodoMes == lastMonth).ToList());
+
         #endregion
 
         return View(lViewModel);

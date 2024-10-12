@@ -252,7 +252,7 @@
                     </div>
                         <div class="row">
                             <!-- Tarjeta 1 -->
-                            <div class="col-lg-6 col-md-6 mb-4">
+                            <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary">@Model.LastYear - @Model.LastPeriod</h2>
@@ -260,11 +260,21 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 mb-4">
+                            <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary">@Model.CantidadBoletasPublicas</h2>
                                         <p class="card-text">Cantidad de boletas públicas</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">¿Qué día de la semana trabaje más en el sistema público? (Último Período)</h5>
+                                        <div>
+                                            <canvas id="graficoBoletasPublico"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -304,18 +314,7 @@
                                 </div>
                             </div> 
                         </div>
-                        <div class="row">
-                             <div class="col-lg-12 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5 class="card-title">¿Qué día de la semana trabaje más en el sistema público? (Último Período)</h5>
-                                        <div>
-                                            <canvas id="graficoBoletasPublico"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                       
                         <div class="row">
                             <div class="col-lg-12 col-md-12 mb-4">
                                 <div class="card">
@@ -445,7 +444,7 @@
                     </div>
                         <div class="row">
                             <!-- Tarjeta 1 -->
-                            <div class="col-lg-6 col-md-6 mb-4">
+                            <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.LastYear - @Model.LastPeriod</span></h2>
@@ -453,11 +452,21 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 mb-4">
+                            <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.CantidadBoletasPrivadas</span></h2>
                                         <p class="card-text">Cantidad de boletas privadas</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">¿Qué día de la semana trabaje más en el sistema privado? (Último Período)</h5>
+                                        <div>
+                                            <canvas id="graficoBoletasPrivado"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -498,28 +507,14 @@
                             </div> 
                         </div>
                         <div class="row">
-                             <div class="col-lg-12 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5 class="card-title">¿Qué día de la semana trabaje más en el sistema privado? (Último Período)</h5>
-                                        <div>
-                                            <canvas id="graficoBoletasPrivado"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
+                            <div class="col-lg-6 col-md-12 mb-4">
                                 <div class="card">
                                     <div class="card-body">
                                         <canvas id="graficoIngresosPrivados"></canvas>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
+                            <div class="col-lg-6 col-md-12 mb-4">
                                 <div class="card">
                                     <div class="card-body">
                                         <canvas id="graficoCantidadMesPrivados"></canvas>
@@ -527,14 +522,35 @@
                                 </div>
                             </div>
                         </div>
-                         <!-- Gráfico -->
-                        <div class="col-lg-12 col-md-12 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body" style="width: 100%;">
-                                    <canvas id="graficoMutualesPrivados"></canvas>
+                        <!-- Gráfico -->
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body" style="width: 100%;">
+                                        <canvas id="graficoMutualesPrivados"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body" style="width: 100%;">
+                                        <canvas id="graficoCirujanoPrivados"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body" style="width: 100%;">
+                                        <canvas id="graficoHospitalesPrivados"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-lg-12 col-md-6 mb-4">
                                 <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
@@ -621,9 +637,48 @@
         </div>
 
         <!-- Tab 5: Boletas -->
-        <div class="tab-content" id="tab-4">
+        <div class="tab-content" id="tab-5">
             <h2>Detalle Boletas</h2>
-            <p>DetallBoletas"</p>
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 mb-4">
+                                <h3 class="mb-4">Boletas del Archivo</h3>
+                                <div class="table-responsive">
+                                    <table id="tablaBoletasDelArchivo" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                                        <thead class="table-light">
+                                            <tr>
+                                                 <th>Número Boleta</th>
+                                                 <th>Fecha</th>
+                                                 <th>Periodo</th>
+                                                 <th>Mutual</th>
+                                                 <th>Hospital</th>
+                                                 <th>Cirujano</th>
+                                                 <th>Facturado</th>
+                                                 <th>Cobrado</th>
+                                                 <th>Debitado</th>                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.ListadoBoletas.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
+                                            {
+                                                <tr>
+                                                    <td>@item.NumeroBoleta</td>
+                                                    <td>@item.Fecha.ToShortDateString()</td>
+                                                    <td>@item.PeriodoAnio - @item.PeriodoMes</td>
+                                                    <td>@item.EntidadCodigo - @item.EntidadTexto</td>
+                                                    <td>@item.Hospital</td>
+                                                    <td>@item.Cirujano</td>
+                                                    <td>@String.Format("{0:C}", item.Facturado)</td>
+                                                    <td>@String.Format("{0:C}", item.Debitado)</td>
+                                                    <td>@String.Format("{0:C}", item.Cobrado)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    </div>
+                </div>
         </div>
     </div>
 </div>
@@ -692,17 +747,17 @@
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDia));
 
+            var labels = Object.keys(cantidadBoletasDia); // Claves del diccionario (días)
             var data = Object.values(cantidadBoletasDia); // Valores del diccionario (cantidad de boletas)
-
 
             var ctx = document.getElementById('graficoBoletas').getContext('2d');
             var graficoBoletas = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    labels: labels, // Usar las claves como etiquetas
                     datasets: [{
                         label: 'Cantidad de Boletas',
-                        data: data,
+                        data: data, // Usar los valores correspondientes
                         backgroundColor: 'rgba(75, 192, 75, 0.6)',
                         borderColor: 'rgba(75, 192, 75, 1)',
                         borderWidth: 1
@@ -725,19 +780,19 @@
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaLastPeriod));
 
+            var labels = Object.keys(cantidadBoletasDia); // Claves del diccionario (días)
             var data = Object.values(cantidadBoletasDia); // Valores del diccionario (cantidad de boletas)
-
 
             var ctx = document.getElementById('graficoBoletaslastperiod').getContext('2d');
             var graficoBoletas = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    labels: labels, // Usar las claves como etiquetas
                     datasets: [{
                         label: 'Cantidad de Boletas',
-                        data: data,
-                        backgroundColor: "#9B59B6",
-                        borderColor: "#9B59B6",
+                        data: data, // Usar los valores correspondientes
+                        backgroundColor: '#9B59B6',
+                        borderColor: '#9B59B6',
                         borderWidth: 1
                     }]
                 },
@@ -757,19 +812,19 @@
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPublico));
 
+            var labels = Object.keys(cantidadBoletasDia); // Claves del diccionario (días)
             var data = Object.values(cantidadBoletasDia); // Valores del diccionario (cantidad de boletas)
-
 
             var ctx = document.getElementById('graficoBoletasPublico').getContext('2d');
             var graficoBoletas = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    labels: labels, // Usar las claves como etiquetas
                     datasets: [{
                         label: 'Cantidad de Boletas',
-                        data: data,
-                        backgroundColor: "#9B59B6",
-                        borderColor: "#9B59B6",
+                        data: data, // Usar los valores correspondientes
+                        backgroundColor: '#007BFF',
+                        borderColor: '#007BFF',
                         borderWidth: 1
                     }]
                 },
@@ -789,19 +844,19 @@
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPrivado));
 
+            var labels = Object.keys(cantidadBoletasDia); // Claves del diccionario (días)
             var data = Object.values(cantidadBoletasDia); // Valores del diccionario (cantidad de boletas)
-
 
             var ctx = document.getElementById('graficoBoletasPrivado').getContext('2d');
             var graficoBoletas = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    labels: labels, // Usar las claves como etiquetas
                     datasets: [{
                         label: 'Cantidad de Boletas',
-                        data: data,
-                        backgroundColor: "#9B59B6",
-                        borderColor: "#9B59B6",
+                        data: data, // Usar los valores correspondientes
+                        backgroundColor: 'rgba(75, 192, 75, 0.6)',
+                        borderColor: 'rgba(75, 192, 75, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -995,6 +1050,25 @@
                 $('#tablaSaldosMensualesPrivados').DataTable({
                     paging: true, // Habilitar paginación
                     pageLength: 12, // Mostrar 12 registros por página
+                    lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                    searching: true, // Habilitar búsqueda
+                    ordering: true, // Permitir ordenar columnas
+                    info: true, // Mostrar información del número de registros
+                    autoWidth: false, // Auto-ajuste de ancho de columnas
+                    responsive: true, // Habilitar responsividad
+                    dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                    ],
+                    order: [], // Desactiva el orden automático
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                    }
+                });
+
+                $('#tablaBoletasDelArchivo').DataTable({
+                    paging: true, // Habilitar paginación
+                    pageLength: 50, // Mostrar 12 registros por página
                     lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
                     searching: true, // Habilitar búsqueda
                     ordering: true, // Permitir ordenar columnas
@@ -2129,6 +2203,208 @@
         chart.resize(); // Volver a renderizar el gráfico
     });
 
+    window.addEventListener('load', function() {
+        chart.resize();
+    });
+        </script>
+
+        <!--Grafico de tortas Cantidad de Boletas por Cirujano -->
+          <script type="text/javascript">
+    // Obtener las entidades y las cantidades de boletas
+    var entidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorCirujanoPrivados.Keys));
+    var cantidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorCirujanoPrivados.Values));
+
+    // Calcular el total de boletas
+    var total = cantidades.reduce((a, b) => a + b, 0);
+
+    // Configurar el gráfico de torta con Chart.js
+    var ctx = document.getElementById('graficoCirujanoPrivados').getContext('2d');
+    
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: entidades, // Etiquetas de las entidades
+            datasets: [{
+                label: 'Cantidad de cirugías',
+                data: cantidades, // Valores correspondientes a las boletas
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 205, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'left',
+                     // Leyenda en la parte superior
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                           var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
+                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
+                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total de las boletas
+                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje correcto
+
+                            var label = tooltipItem.label || '';
+
+                            // Devolver el texto del tooltip con cantidad y porcentaje en negrita
+                            return `${label}: ${value} cirugias (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true, // Mostrar el título
+                    text: 'Cantidad de boletas por Cirujano (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
+                    font: {
+                        size: 20 // Tamaño de la fuente del título
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            },
+            onClick: function(e, elements) {
+                if (elements.length > 0) {
+                    var index = elements[0].index;
+                    var dataset = chart.data.datasets[0];
+                    
+                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
+                    if (!dataset._meta) {
+                        dataset._meta = Array(dataset.data.length).fill(false);
+                    }
+                    dataset._meta[index] = !dataset._meta[index];
+                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
+                    chart.update();
+                }
+            }
+        }
+    });
+
+    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
+    window.addEventListener('resize', function() {
+        chart.resize(); // Volver a renderizar el gráfico
+    });
+
+    // Redibujar el gráfico al cargar la página completamente
+    window.addEventListener('load', function() {
+        chart.resize();
+    });
+        </script>
+
+        <!--Grafico de tortas Cantidad de Boletas por Hospital -->
+          <script type="text/javascript">
+    // Obtener las entidades y las cantidades de boletas
+    var entidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorHospitalPrivados.Keys));
+    var cantidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorHospitalPrivados.Values));
+
+    // Calcular el total de boletas
+    var total = cantidades.reduce((a, b) => a + b, 0);
+
+    // Configurar el gráfico de torta con Chart.js
+    var ctx = document.getElementById('graficoHospitalesPrivados').getContext('2d');
+    
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: entidades, // Etiquetas de las entidades
+            datasets: [{
+                label: 'Cantidad de boletas',
+                data: cantidades, // Valores correspondientes a las boletas
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 205, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'left',
+                     // Leyenda en la parte superior
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                           var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
+                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
+                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total de las boletas
+                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje correcto
+
+                            var label = tooltipItem.label || '';
+
+                            // Devolver el texto del tooltip con cantidad y porcentaje en negrita
+                            return `${label}: ${value} cirugias (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true, // Mostrar el título
+                    text: 'Cantidad de boletas por Hospital (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
+                    font: {
+                        size: 20 // Tamaño de la fuente del título
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            },
+            onClick: function(e, elements) {
+                if (elements.length > 0) {
+                    var index = elements[0].index;
+                    var dataset = chart.data.datasets[0];
+                    
+                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
+                    if (!dataset._meta) {
+                        dataset._meta = Array(dataset.data.length).fill(false);
+                    }
+                    dataset._meta[index] = !dataset._meta[index];
+                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
+                    chart.update();
+                }
+            }
+        }
+    });
+
+    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
+    window.addEventListener('resize', function() {
+        chart.resize(); // Volver a renderizar el gráfico
+    });
+
+    // Redibujar el gráfico al cargar la página completamente
     window.addEventListener('load', function() {
         chart.resize();
     });
