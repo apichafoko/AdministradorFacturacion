@@ -18,6 +18,10 @@ namespace FacturacionSimple
 		public Dictionary<string, int> CantidadBoletasDia { get; set; }
 
         public Dictionary<string, int> CantidadBoletasDiaLastPeriod { get; set; }
+
+        public Dictionary<string, int> CantidadBoletasDiaPublico { get; set; }
+
+        public Dictionary<string, int> CantidadBoletasDiaPrivado { get; set; }
         public double PromedioBoletaUltimoMesGeneral { get; set; }
 
         public List<SaldosMensuales> SaldosHistoricosPublicos {get;set;}

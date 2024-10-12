@@ -100,6 +100,16 @@ public class HomeController : Controller
         // Cuenta la cantidad de boletas por día de la semana del último periodo y las asigna al ViewModel
         lViewModel.CantidadBoletasDiaLastPeriod = _boletaProcessor.CantidadBoletasDiaSemana(boletas.Where(b => b.PeriodoAnio == lastYear && b.PeriodoMes == lastMonth).ToList());
 
+        lViewModel.CantidadBoletasDiaPublico = _boletaProcessor.CantidadBoletasDiaSemana(
+            boletas.Where(b => lEntidadesPublicas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                   b.PeriodoAnio == lastYear &&
+                   b.PeriodoMes == lastMonth).ToList());
+
+        lViewModel.CantidadBoletasDiaPrivado = _boletaProcessor.CantidadBoletasDiaSemana(
+            boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                       b.PeriodoAnio == lastYear &&
+                       b.PeriodoMes == lastMonth).ToList());
+        
         lViewModel.EdadPacientes = _boletaProcessor.GetEdadesPromedio(boletas);
 
         var top19BoletasPorEntidad = boletas
