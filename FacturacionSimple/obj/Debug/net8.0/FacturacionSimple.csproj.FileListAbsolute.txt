@@ -391,3 +391,5 @@
 /Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/bin/Debug/net8.0/zh-Hans/Microsoft.CodeAnalysis.CSharp.resources.dll
 /Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/bin/Debug/net8.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.resources.dll
 /Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/obj/Debug/net8.0/FacturacionSimple.MvcApplicationPartsAssemblyInfo.cs
+/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/bin/Debug/net8.0/Files/cotizaciones.json

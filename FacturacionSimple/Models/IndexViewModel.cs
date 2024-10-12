@@ -32,6 +32,12 @@ namespace FacturacionSimple
         public int LastPeriod {get;set;}
         public int LastYear {get;set;}
         
+        public Dictionary<DateTime, double> IngresosTotalesUSD { get; set; }
+
+        public Dictionary<DateTime, double> CotizacionesUSD { get; set; }
+        public double CotizacionUSDLast {get;set;}
+
+
         //Publico
 		public int CantidadBoletasPublicas { get; set; }
         
@@ -46,8 +52,6 @@ namespace FacturacionSimple
 
         public Dictionary<DateTime, double> IngresosMensualesPublico { get; set; }
 
-        public List<FlujosBrutosProximos> FlujosProximosPublico { get; set; }
-        public List<CobrosProximos> CobrosProximosPublico { get; set; }
         public List<MontosPorPeriodo> MontosProximosACobrarPublico { get; set; }
 
         public Dictionary<string, int> CantidadBoletasPorMutualPublico { get; set; }
@@ -60,14 +64,16 @@ namespace FacturacionSimple
         public double BoletaMenorValorU3MPrivados { get; set; }
         public double BoletaMayorValorU3MPrivados { get; set; }
 
-        public double IngresoPromedioUltimos3BrutoPrivados { get; set; }
+        public double IngresoPromedioUltimoPrivado { get; set; }
 
         public Dictionary<DateTime, double> IngresosMensualesPrivados { get; set; }
 
-        public List<FlujosBrutosProximos> FlujosProximosPrivados { get; set; }
-        public List<CobrosProximos> CobrosProximosPrivado { get; set; }
+        public List<MontosPorPeriodo> MontosProximosACobrarPrivado { get; set; }
 
         public Dictionary<string, int> CantidadBoletasPorMutualPrivados { get; set; }
+
+        public Dictionary<DateTime,int> CantidadBoletasMensualesPrivado { get; set;}
+
 
         public double CantidadBoletasPagosParciales { get; set; }
         public double MontoRestantePagosParciales { get; set; }

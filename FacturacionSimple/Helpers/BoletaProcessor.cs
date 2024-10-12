@@ -13,22 +13,17 @@ namespace FacturacionSimple.Helpers
     {
         private readonly IHubContext<ProgressHub> _hubContext;
 
-
         public BoletaProcessor(IHubContext<ProgressHub> hubContext)
         {
             _hubContext = hubContext;
-
         }
 
         public async Task<List<Boleta>> ProcesarArchivo(string filePath)
         {
-
-
             var boletas = LeerBoletasDesdeArchivo(filePath);
 
             int totalBoletas = boletas.Count;
             int processedBoletas = 0;
-
 
             try
             {
@@ -42,7 +37,6 @@ namespace FacturacionSimple.Helpers
 
                     // Enviar actualización de progreso al cliente
                     await _hubContext.Clients.All.SendAsync("ReceiveProgress", porcentaje);
-
                 }
 
                 // Enviar notificación de que el proceso ha terminado
@@ -56,9 +50,7 @@ namespace FacturacionSimple.Helpers
                 await _hubContext.Clients.All.SendAsync("ReceiveProgress", 100);
                 throw; // Volver a lanzar la excepción para manejarla si es necesario
             }
-
         }
-
 
         private List<Boleta> LeerBoletasDesdeArchivo(string filePath)
         {
@@ -102,7 +94,6 @@ namespace FacturacionSimple.Helpers
                             lBoleta.EntidadCodigo = lEntidad.Codigo;
                             lBoleta.EntidadTexto = lEntidad.Nombre;
 
-
                             // Intentar parsear la fecha de forma flexible
                             DateTime fechaBoleta;
                             if (DateTime.TryParse(reader.GetValue(3)?.ToString(), out fechaBoleta))
@@ -116,7 +107,6 @@ namespace FacturacionSimple.Helpers
                                 throw new FormatException($"La fecha '{reader.GetValue(3)?.ToString()}' no es válida.");
                             }
 
-
                             boletas.Add(lBoleta);
                         }
                     }
@@ -125,10 +115,6 @@ namespace FacturacionSimple.Helpers
 
             return boletas;
         }
-
-
-
-
 
         public Dictionary<string, int> CantidadBoletasDiaSemana(List<Boleta> Listado)
         {
@@ -159,9 +145,7 @@ namespace FacturacionSimple.Helpers
             }
 
             return lDiccionarioOrdenado;
-
         }
-
 
         public List<SaldosMensuales> GetSaldosMensuales(List<Boleta> Listado)
         {
@@ -190,7 +174,6 @@ namespace FacturacionSimple.Helpers
                 }
             }
 
-
             return lSaldosMensuales;
         }
 
@@ -207,24 +190,16 @@ namespace FacturacionSimple.Helpers
             return boletasPorPeriodo;
         }
 
-
-
-
         public double GetBoletaMayorValorUltimos3Meses(IEnumerable<Boleta> boletas)
-
         {
-
             var averageIncome = boletas.OrderByDescending(b => b.Facturado).FirstOrDefault().Facturado;
             return Math.Round(averageIncome, 2);
-
         }
 
         public double GetBoletaMenorValorUltimos3Meses(IEnumerable<Boleta> boletas)
-
         {
             var averageIncome = boletas.OrderBy(b => b.Facturado).FirstOrDefault().Facturado;
             return Math.Round(averageIncome, 2);
-
         }
 
         public List<Entidad> GetEntidades(IEnumerable<Boleta> boletas)
@@ -236,8 +211,6 @@ namespace FacturacionSimple.Helpers
 
             return lReturn;
         }
-
-
 
         public List<MontosPorPeriodo> GetMontosPorPeriodo(IEnumerable<Boleta> boletas, int lastYear, int lastMonth)
         {
@@ -266,7 +239,7 @@ namespace FacturacionSimple.Helpers
 
                 if (boletas1Mes.Count() > 0)
                 {
-                     var montosPorPeriodo = montosPorPeriodos.FirstOrDefault(m => m.Periodo == $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 1:D2}");
+                    var montosPorPeriodo = montosPorPeriodos.FirstOrDefault(m => m.Periodo == $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 1:D2}");
                     if (montosPorPeriodo == null)
                     {
                         montosPorPeriodo = new MontosPorPeriodo();
@@ -288,9 +261,7 @@ namespace FacturacionSimple.Helpers
                             montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
                         }
                     }
-
                 }
-
                 #endregion
 
                 #region 2Meses
@@ -307,7 +278,6 @@ namespace FacturacionSimple.Helpers
                         montosPorPeriodos.Add(montosPorPeriodo);
                     }
 
-
                     foreach (var boleta in periodoGrupo.Where(b => !EntidadesMes1.Contains(b.EntidadCodigo) && !EntidadesMes3.Contains(b.EntidadCodigo)))
                     {
                         var clave = $"{boleta.Entidad.Codigo} - {boleta.Entidad.Nombre}";
@@ -321,9 +291,7 @@ namespace FacturacionSimple.Helpers
                             montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
                         }
                     }
-
                 }
-
                 #endregion
 
                 #region 3Meseses
@@ -353,13 +321,8 @@ namespace FacturacionSimple.Helpers
                             montosPorPeriodo.MontosPorEntidad[clave] = boleta.Facturado;
                         }
                     }
-
                 }
-
                 #endregion
-
-
-
             }
 
             // Ordenar los MontosPorEntidad por el valor dentro de cada periodo
@@ -372,9 +335,8 @@ namespace FacturacionSimple.Helpers
 
             return montosPorPeriodos;
         }
-    
-    
-        public Dictionary<string,int> GetEdadesPromedio(List<Boleta> Listado)
+
+        public Dictionary<string, int> GetEdadesPromedio(List<Boleta> Listado)
         {
             var gruposEtarios = new Dictionary<string, int>
             {
@@ -420,9 +382,25 @@ namespace FacturacionSimple.Helpers
             }
 
             return gruposEtarios;
+        }
+    
+        public Dictionary<DateTime,double> GetFacturacionenUSD(List<SaldosMensuales> Listado, Dictionary<DateTime,double> Cotizaciones)
+        {
+        
+        var facturacionEnUSD = new Dictionary<DateTime, double>();
 
+        foreach (var saldo in Listado)
+        {
+            var periodo = DateTime.ParseExact(saldo.Periodo, "yyyy - MM", CultureInfo.InvariantCulture);
+            if (Cotizaciones.TryGetValue(periodo, out var cotizacion))
+            {
+                facturacionEnUSD[periodo] = saldo.ImporteFacturadoBruto / cotizacion;
+            }
+        }
+
+        return facturacionEnUSD;
 
         }
+    
     }
 }
-
