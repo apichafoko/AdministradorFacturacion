@@ -284,12 +284,18 @@ public class HomeController : Controller
         lViewModel.CantidadBoletasPorCirujanoPrivados = _boletaProcessor.GetCantidadBoletasPorCirujano(
             boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
                        b.PeriodoAnio == lastYear &&
-                       b.PeriodoMes == lastMonth).ToList());
+                       b.PeriodoMes == lastMonth)
+            .Take(30).ToList());
 
         lViewModel.CantidadBoletasPorHospitalPrivados = _boletaProcessor.GetCantidadBoletasPorHospital(
             boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
                        b.PeriodoAnio == lastYear &&
                        b.PeriodoMes == lastMonth).ToList());
+
+        lViewModel.FacturacionPorCirujanoPrivados = _boletaProcessor.GetFacturacionPorCirujano(
+            boletas.Where(b => lEntidadesPrivadas.Any(e => e.Codigo == b.Entidad.Codigo) &&
+                       b.PeriodoAnio == lastYear &&
+                       b.PeriodoMes == lastMonth).Take(30).ToList());
 
         #endregion
 
@@ -366,7 +372,7 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    public static async Task<Dictionary<DateTime, double>> GetCotizacionDolar(List<DateTime> Fechas, IWebHostEnvironment hostingEnvironment)
+    public static async Task<Dictionary<DateTime, double>> GetCotizacionDolarOld(List<DateTime> Fechas, IWebHostEnvironment hostingEnvironment)
     {
         HttpClient client = new HttpClient();
         var cotizaciones = new Dictionary<DateTime, double>();
@@ -442,6 +448,72 @@ public class HomeController : Controller
         // Guardar las cotizaciones en el archivo JSON
         var jsonContent = JsonConvert.SerializeObject(cotizaciones, Formatting.Indented);
         await System.IO.File.WriteAllTextAsync(jsonFilePath, jsonContent);
+
+        return cotizaciones;
+    }
+
+    public static async Task<Dictionary<DateTime, double>> GetCotizacionDolar(List<DateTime> Fechas, IWebHostEnvironment hostingEnvironment)
+    {
+        HttpClient client = new HttpClient();
+        var cotizaciones = new Dictionary<DateTime, double>();
+
+        // Ruta del archivo JSON
+        var jsonFilePath = Path.Combine(hostingEnvironment.ContentRootPath, "Files", "cotizaciones.json");
+
+        // Leer el contenido existente del archivo JSON si existe
+        var existingCotizaciones = new Dictionary<DateTime, double>();
+        if (System.IO.File.Exists(jsonFilePath))
+        {
+            var existingContent = await System.IO.File.ReadAllTextAsync(jsonFilePath);
+            existingCotizaciones = JsonConvert.DeserializeObject<Dictionary<DateTime, double>>(existingContent);
+        }
+
+        foreach (var fecha in Fechas)
+        {
+            if (existingCotizaciones != null && existingCotizaciones.ContainsKey(fecha))
+            {
+            cotizaciones[fecha] = existingCotizaciones[fecha];
+            continue;
+            }
+            try
+            {
+            // Formatea la fecha en el formato requerido por la API
+            string formattedDate = fecha.ToString("yyyy-MM");
+
+            // URL de la API para obtener los valores más recientes del dólar
+            string url = $"https://api.bluelytics.com.ar/v2/evolution.json";
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode(); // Verifica si la solicitud fue exitosa
+
+            // Lee el contenido de la respuesta en formato JSON
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            // Deserializa la respuesta JSON en un objeto dinámico
+            var jsonResponse = JsonConvert.DeserializeObject<List<JsonDTO>>(responseBody);
+
+            var valoresUsdJson = jsonResponse.Where(x => x.date.Month == fecha.Month && x.date.Year == fecha.Year && x.source == "Blue").ToList();
+
+            var valoresMes = valoresUsdJson.Select(x => (x.value_buy + x.value_sell) / 2).ToList();
+
+            double valueAvgBlue = Math.Round(valoresMes.Average(), 2);
+
+            // Guarda el valor en el diccionario
+            cotizaciones[fecha] = valueAvgBlue;
+
+            // Actualiza el archivo JSON con el nuevo valor
+            if (existingCotizaciones == null)
+            {
+                existingCotizaciones = new Dictionary<DateTime, double>();
+            }
+            existingCotizaciones[fecha] = valueAvgBlue;
+            var jsonContent = JsonConvert.SerializeObject(existingCotizaciones, Formatting.Indented);
+            await System.IO.File.WriteAllTextAsync(jsonFilePath, jsonContent);
+            }
+            catch (HttpRequestException e)
+            {
+            Console.WriteLine($"\nExcepción para la fecha {fecha.ToString("yyyy-MM")}: " + e.Message);
+            }
+        }
 
         return cotizaciones;
     }

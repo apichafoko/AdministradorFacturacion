@@ -82,6 +82,8 @@ namespace FacturacionSimple
 
         public Dictionary<string, int> CantidadBoletasPorHospitalPrivados { get; set; }
 
+        public Dictionary<string, double> FacturacionPorCirujanoPrivados { get; set; }
+
         public double CantidadBoletasPagosParciales { get; set; }
         public double MontoRestantePagosParciales { get; set; }
         public Dictionary<string,int> EntidadesPagosParciales { get; set; }

@@ -207,7 +207,7 @@
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;">$ @String.Format("{0:N2}", Model.CotizacionUSDLast)</span></h2> 
-                                        <p class="card-text">Cotización dolar blue al <b>01 - del @Model.LastPeriod - @Model.LastYear</b></p>
+                                        <p class="card-text">Cotización dolar blue promedio del mes <b>01 - del @Model.LastPeriod - @Model.LastYear</b></p>
                                     </div>
                                 </div>
                             </div>
@@ -216,7 +216,7 @@
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;"> $ @String.Format("{0:N2}", (Model.IngresosTotalesUSD?.FirstOrDefault().Value ?? 0))</span></h2>
-                                        <p class="card-text">Facturación brut total en USD</p>
+                                        <p class="card-text">Facturación bruta total en USD</p>
                                     </div>
                                 </div>
                             </div>
@@ -232,7 +232,7 @@
                                 </div>
                             </div>
                         </div>
-            </div>
+                     </div>
         </div>
 
         <!-- Tab 3: Público -->
@@ -533,10 +533,17 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
+                            <div class="col-lg-6 col-md-12 mb-4">
                                 <div class="card shadow-sm">
                                     <div class="card-body" style="width: 100%;">
                                         <canvas id="graficoCirujanoPrivados"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body" style="width: 100%;">
+                                        <canvas id="graficoFacturacionCirujanoPrivados"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -777,37 +784,85 @@
 
         <!--Grafico Distribución de boletas por dia último periodo -->
         <script type="text/javascript">
+    // Datos de boletas del sector público
+    var cantidadBoletasDiaPublico = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPublico));
 
-            var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaLastPeriod));
+    // Datos de boletas del sector privado
+    var cantidadBoletasDiaPrivado = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPrivado));
 
-            var labels = Object.keys(cantidadBoletasDia); // Claves del diccionario (días)
-            var data = Object.values(cantidadBoletasDia); // Valores del diccionario (cantidad de boletas)
+    // Obtener todos los días (labels) de ambos conjuntos
+    var allDays = new Set([...Object.keys(cantidadBoletasDiaPublico), ...Object.keys(cantidadBoletasDiaPrivado)]);
 
-            var ctx = document.getElementById('graficoBoletaslastperiod').getContext('2d');
-            var graficoBoletas = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels, // Usar las claves como etiquetas
-                    datasets: [{
-                        label: 'Cantidad de Boletas',
-                        data: data, // Usar los valores correspondientes
-                        backgroundColor: '#9B59B6',
-                        borderColor: '#9B59B6',
-                        borderWidth: 1
-                    }]
+    // Convertir el Set a un array y ordenar por día de la semana (si son fechas, por fecha)
+    var labels = Array.from(allDays).sort();
+
+    // Alinear datos públicos con todos los días
+    var dataPublico = labels.map(function(day) {
+        return cantidadBoletasDiaPublico[day] || 0; // Si no hay datos, usar 0
+    });
+
+    // Alinear datos privados con todos los días
+    var dataPrivado = labels.map(function(day) {
+        return cantidadBoletasDiaPrivado[day] || 0; // Si no hay datos, usar 0
+    });
+
+    // Crear el gráfico apilado
+    var ctx = document.getElementById('graficoBoletaslastperiod').getContext('2d');
+    var graficoBoletasCombinado = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels, // Usar todos los días como etiquetas
+            datasets: [
+                {
+                    label: 'Boletas Públicas',
+                    data: dataPublico,
+                    backgroundColor: 'rgba(0, 123, 255, 0.6)', // Color azul con transparencia
+                    borderColor: '#007BFF',
+                    borderWidth: 1
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                {
+                    label: 'Boletas Privadas',
+                    data: dataPrivado,
+                    backgroundColor: 'rgba(75, 192, 75, 0.6)', // Color verde con transparencia
+                    borderColor: 'rgba(75, 192, 75, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true // Apilar los valores en el eje X
+                },
+                y: {
+                    stacked: true, // Apilar los valores en el eje Y
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            var label = tooltipItem.dataset.label || '';
+                            var value = tooltipItem.raw;
+                            return label + ': ' + value.toLocaleString(); // Mostrar valor formateado
                         }
                     }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
                 }
-            });
-        </script>
+            }
+        }
+    });
+</script>
 
+
+
+        <!--Grafico Distribución de boletas por dia último periodo público -->
         <script type="text/javascript">
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPublico));
@@ -840,6 +895,7 @@
             });
         </script>
 
+        <!--Grafico Distribución de boletas por dia último periodo privado -->
         <script type="text/javascript">
 
             var cantidadBoletasDia = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPrivado));
@@ -1832,7 +1888,7 @@
     });
         </script>
 
- <!--Grafico Ingresos Privados-->
+        <!--Grafico Ingresos Privados-->
         <script type="text/javascript">
             // Formatear los periodos en formato "YYYY - MM"
             var periodos = @Html.Raw(Json.Serialize(Model.IngresosMensualesPrivados.Keys.TakeLast(12).Select(p => p.ToString("yyyy - MM"))));
@@ -2409,6 +2465,114 @@
         chart.resize();
     });
         </script>
+
+        <!--Grafico de tortas Facturacion por Cirujano-->
+       <script type="text/javascript">
+    // Obtener las entidades y las cantidades de boletas
+    var entidades = @Html.Raw(Json.Serialize(Model.FacturacionPorCirujanoPrivados.Keys));
+    var cantidades = @Html.Raw(Json.Serialize(Model.FacturacionPorCirujanoPrivados.Values));
+
+    // Calcular el total de boletas
+    var total = cantidades.reduce((a, b) => a + b, 0);
+
+    // Función para formatear números con separador de miles y decimales
+    function formatCurrency(value) {
+    return '$' + value
+        .toFixed(2) // Limita a 2 decimales
+        .replace('.', ',') // Reemplaza el punto decimal por una coma
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Coloca los puntos como separadores de miles
+}
+
+    // Configurar el gráfico de torta con Chart.js
+    var ctx = document.getElementById('graficoFacturacionCirujanoPrivados').getContext('2d');
+    
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: entidades, // Etiquetas de las entidades
+            datasets: [{
+                label: 'Facturación',
+                data: cantidades, // Valores correspondientes a las boletas
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 205, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'left', // Leyenda a la izquierda
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
+                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
+                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total
+                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje
+                            
+                            var label = tooltipItem.label || '';
+                            // Devolver el texto del tooltip con formato de moneda y porcentaje
+                            return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true, // Mostrar el título
+                    text: 'Facturación por cirujano (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
+                    font: {
+                        size: 20 // Tamaño de la fuente del título
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            },
+            onClick: function(e, elements) {
+                if (elements.length > 0) {
+                    var index = elements[0].index;
+                    var dataset = chart.data.datasets[0];
+                    
+                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
+                    if (!dataset._meta) {
+                        dataset._meta = Array(dataset.data.length).fill(false);
+                    }
+                    dataset._meta[index] = !dataset._meta[index];
+                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
+                    chart.update();
+                }
+            }
+        }
+    });
+
+    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
+    window.addEventListener('resize', function() {
+        chart.resize(); // Volver a renderizar el gráfico
+    });
+
+    // Redibujar el gráfico al cargar la página completamente
+    window.addEventListener('load', function() {
+        chart.resize();
+    });
+</script>
+
 
 }
 

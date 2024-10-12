@@ -409,7 +409,7 @@ namespace FacturacionSimple.Helpers
                 var periodo = DateTime.ParseExact(saldo.Periodo, "yyyy - MM", CultureInfo.InvariantCulture);
                 if (Cotizaciones.TryGetValue(periodo, out var cotizacion))
                 {
-                    facturacionEnUSD[periodo] = saldo.ImporteFacturadoBruto / cotizacion;
+                    facturacionEnUSD[periodo] = Math.Round(saldo.ImporteFacturadoBruto / cotizacion, 2);
                 }
             }
 
@@ -437,6 +437,16 @@ namespace FacturacionSimple.Helpers
                 .ToDictionary(g => g.Key, g => g.Count());
 
             return boletasPorHospital;
+        }
+
+        internal Dictionary<string, double> GetFacturacionPorCirujano(List<Boleta> boletas)
+        {
+            var facturacionPorCirujano = boletas
+                .GroupBy(b => string.IsNullOrEmpty(b.Cirujano) ? "Desconocido" : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(b.Cirujano.ToLowerInvariant()))
+                .OrderByDescending(g => g.Sum(b => b.Facturado))
+                .ToDictionary(g => g.Key, g => Math.Round(g.Average(b => b.Facturado), 2));
+
+            return facturacionPorCirujano;
         }
     }
 }
