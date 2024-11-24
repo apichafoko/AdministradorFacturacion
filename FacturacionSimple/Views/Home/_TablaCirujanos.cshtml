@@ -1,0 +1,37 @@
+﻿@model IndexViewModel
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 mb-4">
+        <h3 class="mb-4">Facturación por Cirujano (Último Período: @Model.LastPeriod - @Model.LastYear)</h3>
+        <div class="table-responsive">
+            <table id="tablaCirujanos" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th>Cirujano</th>
+                        <th>Cantidad de boletas</th>
+                        <th>Monto total facturado (bruto)</th>
+                        <th>¿Cuánto representa del total facturado?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.FacturacionPorCirujanoPrivados.OrderByDescending(c => c.Porcentaje).ToList())
+                    {
+                        <tr>
+                            <td>@item.Nombre</td>
+                            <td>@item.Cantidad</td>
+                            <td>@String.Format("{0:C}", item.Monto)</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span>@String.Format("{0:N2}%", item.Porcentaje)</span>
+                                    <div class="progress ms-2 w-100" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" style="width: @item.Porcentaje.ToString("N0")%; background-color: rgba(39, 174, 96, 1);" aria-valuenow="@item.Porcentaje" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -6,29 +6,70 @@
 @model IndexViewModel
 
 
-<h2>Subir Archivo Excel</h2>
+<h2>¡Bienvenido!</h2>
 
 <form asp-action="Index" asp-controller="Home" enctype="multipart/form-data" method="post">
-    <div class="form-group">
-        <label for="file">Seleccionar archivo Excel:</label>
-        <input type="file" name="file" class="form-control" accept=".xls,.xlsx" required />
-        <button type="submit" class="btn btn-primary" style="margin: 2px">Subir</button>
-        <p id="progressText">Progreso: 0%</p>
+    <div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 mb-4">
+            <div class="card shadow-sm rounded border-light" style="border-radius: .55rem">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Subir archivo Excel</h5>
+                    <p class="card-text" style="font-style: italic; text-align: center;">
+                        El sistema funciona procesando el archivo excel que se descarga de la sección <u>"Estadística de Boletas"</u> y siguiendo estos 4 pasos.
+                    </p>
+                    <p class="card-text" style="text-align: left;">
+                        <br>Paso 1) Descargar el archivo Excel de la sección <u>"Estadística de Boletas"</u> de la página del portal.
+                        <br>Paso 2) Subir el archivo Excel descargado (.xls) en el paso 1 al sitio <a href="https://cloudconvert.com/xls-to-xlsx">Cloud Convert</a>
+                        <br>Paso 3) Convertir el archivo .XLS a la extension .XLSX
+                        <br><b>Paso 4) Subir el archivo .XLSX a esta aplicación.</b>
+                    </p>
+                    <p>
+                        <u>Importante:</u> El archivo Excel debe ser subido en formato .XLSX. Si no se sube en este formato, el sistema no podrá procesar la información.
+                    </p>
+                    <p>
+                        <b>Nota:</b> <i>Su información no es almacenada en ningún lado. Cuando cierre el explorador se perderá toda la información y  deberá volver a cargar el archivo cada vez que entre.</i>
+                    </p>
+                    <form enctype="multipart/form-data" method="post" action="/subirArchivo">
+                        <div class="form-group mb-3">
+                            <label for="file" class="form-label">Seleccionar archivo Excel:</label>
+                            <input type="file" name="file" class="form-control" accept=".xlsx" required />
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn" style="background-color: #5499C7; color: white; border-color: #2980B9;">Subir</button>
+                        </div>
+                        <div class="mt-3">
+                            @if (ViewBag.Message != null)
+                                {
+                                        <div class="alert alert-info">
+                                        @ViewBag.Message
+                                        </div>
+                                }                 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
 
 </form>
 
-<div id="progressContainer">
-    <div id="progressBar" style="width: 0%; height: 30px; background-color: green;"></div>
-</div>
-@if (Model.ListadoBoletas != null)
+@if (Model.ListadoBoletas.Count() > 0)
 {
 <div class="tabs-container">
     <ul class="tabs-list">
         <li class="tab active" data-tab="tab-1">Datos Históricos</li>
-        <li class="tab" data-tab="tab-2">Datos generales último período</li>
-        <li class="tab" data-tab="tab-3">Público</li>
+        <li class="tab" data-tab="tab-2">Datos generales por período</li>
+        @if(Model.SaldosHistoricosPublicos != null)
+        {
+            <li class="tab" data-tab="tab-3">Público</li>
+        }
+        @if(Model.SaldosHistoricosPrivados != null)
+        {
         <li class="tab" data-tab="tab-4">Privado</li>
+        }
         <li class="tab" data-tab="tab-5">Detalle Boletas</li>
     </ul>
 
@@ -71,7 +112,7 @@
                         <div class="col-lg-6 col-md-12 mb-4">
                             <div class="card shadow-sm">
                                 <div class="card-body">
-                                    <h5 class="card-title">¿Qué día de la semana trabajo más? (Hístorico)</h5>
+                                    <h5 class="card-title">¿Qué día de la semana tengo más boletas? (Histórico)</h5>
                                     <div>
                                         <canvas id="graficoBoletas"></canvas>
                                     </div>
@@ -84,8 +125,19 @@
                         <div class="col-lg-12 col-md-12 mb-4">
                             <div class="card shadow-sm">
                                 <div class="card-body">
-                                    <h5 class="card-title">Facturación historica</h5>
+                                    <h5 class="card-title">Facturación histórica</h5>
                                         <div id="graficoFacturacionHistorica" style="height: 400px; width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-6 mb-4">
+                            <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
+                                <div class="card-body">
+                                    <p class="card-text" style="font-style: italic;text-align: center;">
+                                        El valor del dólar blue esta calculado como el promedio del valor del dolar blue mensual. Se tienen en cuenta el valor de cada día del mes y se calcula el promedio.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -127,14 +179,28 @@
 
         <!-- Tab 2: Ultimo Periodo -->
         <div class="tab-content" id="tab-2">
-            <h2>Datos generales último período</h2>
+            <h2>Datos generales por período</h2>
             <div class="container-fluid mt-4">
-                <div class="row">
+                <!-- Dropdown para seleccionar período -->
+            <div class="row mb-3">
+                <div class="col-lg-4 col-md-6">
+                    <label for="periodSelector" class="form-label">Seleccionar Período</label>
+                    <select id="periodSelector" class="form-select">
+                        @foreach (var item in Model.PeriodosDisponibles)
+                        {
+                            <option value="@item">@item</option>
+                        }
+                        
+                    </select>
+                </div>
+            </div>
+            <div id="resultContainer" >
+            <div class="row">
                         <div class="col-lg-12 col-md-6 mb-4">
                             <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
                                 <div class="card-body">
                                     <p class="card-text" style="font-style: italic;text-align: center;">
-                                        Esta sección muestra los datos tanto del sistema público como privado de tu facturación. <b><u>Toma en cuenta solo las boletas  del último período del Excel.</u></b> 
+                                        Esta sección muestra los datos tanto del sistema público como privado de tu facturación. <b><u>Esta sección toma en cuenta solo las boletas del último período del Excel.</u></b> 
                                     </p>
                                 </div>
                             </div>
@@ -154,7 +220,7 @@
                             <div class="col-lg-6 col-md-12 mb-4">
                                 <div class="card shadow-sm">
                                     <div class="card-body">
-                                        <h5 class="card-title">¿Qué día de la semana trabajé más el último período?</h5>
+                                        <h5 class="card-title">¿Qué día de la semana del período tuve más boletas?</h5>
                                         <div>
                                             <canvas id="graficoBoletaslastperiod"></canvas>
                                         </div>
@@ -207,7 +273,7 @@
                                 <div class="card text-center shadow-sm">
                                     <div class="card-body">
                                         <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;">$ @String.Format("{0:N2}", Model.CotizacionUSDLast)</span></h2> 
-                                        <p class="card-text">Cotización dolar blue promedio del mes <b>01 - del @Model.LastPeriod - @Model.LastYear</b></p>
+                                        <p class="card-text">Cotización dolar blue promedio del mes <b>@Model.LastPeriod - @Model.LastYear</b></p>
                                     </div>
                                 </div>
                             </div>
@@ -232,9 +298,14 @@
                                 </div>
                             </div>
                         </div>
-                     </div>
+            </div>
+            </div>
         </div>
 
+       
+
+        @if(Model.SaldosHistoricosPublicos != null)
+        {
         <!-- Tab 3: Público -->
         <div class="tab-content" id="tab-3">
             <h2>Público</h2>
@@ -244,7 +315,7 @@
                             <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
                                 <div class="card-body">
                                     <p class="card-text" style="font-style: italic;text-align: center;">
-                                        Esta sección muestra <b>solamente las boletas del sistema público </b> presentes en el archivo Excel. Para un correcto funcionamiento <u>baja el Excel y cargalo despuúes del día 15 del mes</u>.
+                                        Esta sección muestra <b>solamente las boletas del sistema público </b> presentes en el archivo Excel. Para un correcto funcionamiento <u>baja el Excel y cargalo después del día 15 del mes</u>.
                                     </p>
                                 </div>
                             </div>
@@ -387,14 +458,14 @@
                                                             var formattedImportePendiente = Math.Round(importePendiente) == 0 
                                                                 ? String.Format("{0:C}", importePendiente)
                                                                 : (importePendiente < 0 
-                                                                    ? "+" + String.Format("{0:C}", Math.Abs(importePendiente)) 
-                                                                    : "-" + String.Format("{0:C}", importePendiente));
+                                                                    ? "+" + String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", Math.Abs(importePendiente)) 
+                                                                    : "-" + String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", importePendiente));
                                                         }
                                                         @formattedImportePendiente
                                                     </td>
-                                                    <td>@String.Format("{0:C}", item.ImporteFacturadoBruto)</td>
-                                                    <td>@String.Format("{0:C}", item.ImporteDebitadoBruto)</td>
-                                                    <td>@String.Format("{0:C}", item.ImporteCobradoBruto)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.ImporteFacturadoBruto)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.ImporteDebitadoBruto)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.ImporteCobradoBruto)</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -426,7 +497,10 @@
                     </div>
             </div>
         </div>
+        }
 
+        @if(Model.SaldosHistoricosPrivados != null)
+        {
         <!-- Tab 4: Privado -->
         <div class="tab-content" id="tab-4">
             <h2>Privado</h2>
@@ -436,212 +510,57 @@
                             <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
                                 <div class="card-body">
                                     <p class="card-text" style="font-style: italic;text-align: center;">
-                                        Esta sección muestra <b>solamente las boletas del sistema privado </b> presentes en el archivo Excel. Para un correcto funcionamiento <u>baja el Excel y cargalo despuúes del día 15 del mes</u>.
+                                        Esta sección muestra <b>solamente las boletas del sistema privado del último período </b> presentes en el archivo Excel. Para un correcto funcionamiento <u>baja el Excel y cargalo después del día 15 del mes</u>.
                                     </p>
                                 </div>
                             </div>
                         </div>
+                    </div> 
+                 <div class="container-fluid mt-4">
+                    <!-- Contenedor para las tarjetas principales -->
+                    <div id="tarjetasPrincipalesContainer">
+                        @await Html.PartialAsync("_TarjetasPrincipales", Model)
                     </div>
-                        <div class="row">
-                            <!-- Tarjeta 1 -->
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card text-center shadow-sm">
-                                    <div class="card-body">
-                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.LastYear - @Model.LastPeriod</span></h2>
-                                        <p class="card-text">Último período procesado</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card text-center shadow-sm">
-                                    <div class="card-body">
-                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.CantidadBoletasPrivadas</span></h2>
-                                        <p class="card-text">Cantidad de boletas privadas</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <h5 class="card-title">¿Qué día de la semana trabaje más en el sistema privado? (Último Período)</h5>
-                                        <div>
-                                            <canvas id="graficoBoletasPrivado"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row"> <!-- Tarjeta 1 --> 
-                            <div class="col-lg-6 col-md-6 mb-4"> 
-                                <div class="card text-center shadow-sm"> 
-                                    <div class="card-body"> 
-                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">$ @String.Format("{0:N2}", @Model.IngresoPromedioUltimoPrivado)</span></h2> 
-                                        <p class="card-text">Facturación bruta del último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p> 
-                                    </div> 
-                                </div> 
-                            </div> <!-- Tarjeta 2 --> 
-                            <div class="col-lg-6 col-md-6 mb-4"> 
-                                <div class="card text-center shadow-sm"> 
-                                    <div class="card-body"> 
-                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">$ @String.Format("{0:N2}", @Model.PromedioBoletaUltimoMesPrivados)</span></h2> 
-                                        <p class="card-text">Boleta promedio último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p> 
-                                    </div> 
-                                </div> 
-                            </div> 
-                        </div>
-                        <div class="row"> <!-- Tarjeta 3 --> 
-                            <div class="col-lg-6 col-md-6 mb-4"> 
-                                <div class="card text-center shadow-sm"> 
-                                    <div class="card-body"> 
-                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">$ @String.Format("{0:N2}", @Model.BoletaMayorValorU3MPrivados)</span></h2> 
-                                        <p class="card-text">Boleta de mayor valor del Último Período <b>(@Model.LastPeriod - @Model.LastYear)</b></p> 
-                                    </div> 
-                                </div> 
-                            </div> 
-                            <div class="col-lg-6 col-md-6 mb-4">
-                                <div class="card text-center shadow-sm"> 
-                                    <div class="card-body"> <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">$ @String.Format("{0:N2}", @Model.BoletaMenorValorU3MPrivados)</span></h2> 
-                                        <p class="card-text">Boleta de menor valor del último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p> 
-                                    </div> 
-                                </div>
-                            </div> 
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-12 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <canvas id="graficoIngresosPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-12 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <canvas id="graficoCantidadMesPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Gráfico -->
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body" style="width: 100%;">
-                                        <canvas id="graficoMutualesPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body" style="width: 100%;">
-                                        <canvas id="graficoCirujanoPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body" style="width: 100%;">
-                                        <canvas id="graficoFacturacionCirujanoPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body" style="width: 100%;">
-                                        <canvas id="graficoHospitalesPrivados"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-lg-12 col-md-6 mb-4">
-                                <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
-                                    <div class="card-body">
-                                        <p class="card-text" style="font-style: italic;text-align: center;">
-                                        Esta tabla muestra el impote facturado, cobrado y debitado por cada período del archivo Excel. 
-                                        Si hay saldo a favor o en contra se muestra en la columna "Diferencia". La diferencia de saldos puede deberse a refacturaciones.
-                                        </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 mb-4">
-                                <h3 class="mb-4">Saldos Mensuales</h3>
-                                <div class="table-responsive">
-                                    <table id="tablaSaldosMensualesPrivados" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Periodo</th>
-                                                <th>Porcentaje del total abonado</th>
-                                                <th>Diferencia</th>
-                                                <th>Importe Facturado (Bruto)</th>
-                                                <th>Importe Debitado (Bruto)</th>
-                                                <th>Importe Abonado (Bruto)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in Model.SaldosHistoricosPrivados.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
-                                            {
-                                                <tr>
-                                                    <td>@item.Periodo</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <span>@String.Format("{0:N2}%", item.PorcentajeCobrado)</span>
-                                                            <div class="progress ms-2 w-100" style="height: 20px;">
-                                                                <div class="progress-bar" role="progressbar" style="width: @item.PorcentajeCobrado.ToString("N0")%; background-color: rgba(39, 174, 96, 1);" aria-valuenow="@item.PorcentajeCobrado" aria-valuemin="0" aria-valuemax="100"></div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        @{
-                                                            var importePendiente = item.ImportePendiente;
-                                                            var formattedImportePendiente = Math.Round(importePendiente) == 0 
-                                                                ? String.Format("{0:C}", importePendiente)
-                                                                : (importePendiente < 0 
-                                                                    ? "+" + String.Format("{0:C}", Math.Abs(importePendiente)) 
-                                                                    : "-" + String.Format("{0:C}", importePendiente));
-                                                        }
-                                                        @formattedImportePendiente
-                                                    </td>
-                                                    <td>@String.Format("{0:C}", item.ImporteFacturadoBruto)</td>
-                                                    <td>@String.Format("{0:C}", item.ImporteDebitadoBruto)</td>
-                                                    <td>@String.Format("{0:C}", item.ImporteCobradoBruto)</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12 col-md-6 mb-4">
-                                <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
-                                    <div class="card-body">
-                                        <p class="card-text" style="font-style: italic;text-align: center;">
-                                                                                Este gráfico se realiza calculando el importe que deberias recibir en los meses siguientes en base al tiempo promedio que tardan las mutuales en realizar los depositos de pago.
-                                        </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <!-- Gráfico -->
-                             <div class="col-lg-12 col-md-12 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body" style="width: 100%;">
-                                    <canvas id="graficoMontosCobrarPrivado"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                        </div>
-            </div>
+
+                    <!-- Contenedor para los gráficos de boletas -->
+                    <div id="graficosBoletasContainer">
+                        @await Html.PartialAsync("_GraficosBoletas", Model)
+                    </div>
+
+                    <!-- Contenedor para las tarjetas de ingresos -->
+                    <div id="tarjetasIngresosContainer">
+                        @await Html.PartialAsync("_TarjetasIngresos", Model)
+                    </div>
+
+                    <!-- Contenedor para los gráficos de ingresos -->
+                    <div id="graficosIngresosContainer">
+                        @await Html.PartialAsync("_GraficosIngresos", Model)
+                    </div>
+
+                    <!-- Contenedor para la tabla de cirujanos -->
+                    <div id="tablaCirujanosContainer">
+                        @await Html.PartialAsync("_TablaCirujanos", Model)
+                    </div>
+
+                    <!-- Contenedor para el gráfico de hospitales -->
+                    <div id="graficoHospitalesContainer">
+                        @await Html.PartialAsync("_GraficoHospitales", Model)
+                    </div>
+
+                    <!-- Contenedor para la tabla de saldos mensuales -->
+                    <div id="tablaSaldosMensualesContainer">
+                        @await Html.PartialAsync("_TablaSaldosMensuales", Model)
+                    </div>
+
+                    <!-- Contenedor para el gráfico de montos a cobrar -->
+                    <div id="graficoMontosCobrarContainer">
+                        @await Html.PartialAsync("_GraficoMontosCobrar", Model)
+                    </div>
+                </div>     
+
             </div>
         </div>
+        }
 
         <!-- Tab 5: Boletas -->
         <div class="tab-content" id="tab-5">
@@ -675,9 +594,9 @@
                                                     <td>@item.EntidadCodigo - @item.EntidadTexto</td>
                                                     <td>@item.Hospital</td>
                                                     <td>@item.Cirujano</td>
-                                                    <td>@String.Format("{0:C}", item.Facturado)</td>
-                                                    <td>@String.Format("{0:C}", item.Debitado)</td>
-                                                    <td>@String.Format("{0:C}", item.Cobrado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Facturado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Debitado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Cobrado)</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -696,6 +615,8 @@
 
 @section Scripts
 {
+
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
@@ -726,29 +647,10 @@
         <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-        <script type="text/javascript">
+        
 
-            /*
-            // Crear una conexión con SignalR
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/progressHub")
-                .build();
-
-            // Definir la función que se ejecutará cuando se reciba una actualización de progreso
-            connection.on("ReceiveProgress", function (porcentaje) {
-                // Actualizar la barra de progreso
-                document.getElementById("progressBar").style.width = porcentaje + "%";
-                document.getElementById("progressText").innerText = "Progreso: " + porcentaje + "%";
-            });
-
-            // Iniciar la conexión
-            connection.start().catch(function (err) {
-                return console.error(err.toString());
-            });
-            */
-
-        </script>
-
+        @if(Model.CantidadBoletasDia != null)
+        {
         <!--Grafico Distribución de boletas por dia -->
         <script type="text/javascript">
 
@@ -781,63 +683,66 @@
                 }
             });
         </script>
+        }
 
+        @if(Model.CantidadBoletasDiaPublico != null || Model.CantidadBoletasDiaPrivado != null)
+        {
         <!--Grafico Distribución de boletas por dia último periodo -->
         <script type="text/javascript">
     // Datos de boletas del sector público
     var cantidadBoletasDiaPublico = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPublico));
-
-    // Datos de boletas del sector privado
     var cantidadBoletasDiaPrivado = @Html.Raw(Json.Serialize(Model.CantidadBoletasDiaPrivado));
 
-    // Obtener todos los días (labels) de ambos conjuntos
-    var allDays = new Set([...Object.keys(cantidadBoletasDiaPublico), ...Object.keys(cantidadBoletasDiaPrivado)]);
+    var datasets = [];
+    var labels = [];
 
-    // Convertir el Set a un array y ordenar por día de la semana (si son fechas, por fecha)
-    var labels = Array.from(allDays).sort();
+    if (cantidadBoletasDiaPublico) {
+        var labelsPublico = Object.keys(cantidadBoletasDiaPublico);
+        labels = [...new Set([...labels, ...labelsPublico])];
+        var dataPublico = labels.map(function(day) {
+            return cantidadBoletasDiaPublico[day] || 0;
+        });
+        datasets.push({
+            label: 'Boletas Públicas',
+            data: dataPublico,
+            backgroundColor: 'rgba(0, 123, 255, 0.6)',
+            borderColor: '#007BFF',
+            borderWidth: 1
+        });
+    }
 
-    // Alinear datos públicos con todos los días
-    var dataPublico = labels.map(function(day) {
-        return cantidadBoletasDiaPublico[day] || 0; // Si no hay datos, usar 0
-    });
+    if (cantidadBoletasDiaPrivado) {
+        var labelsPrivado = Object.keys(cantidadBoletasDiaPrivado);
+        labels = [...new Set([...labels, ...labelsPrivado])];
+        var dataPrivado = labels.map(function(day) {
+            return cantidadBoletasDiaPrivado[day] || 0;
+        });
+        datasets.push({
+            label: 'Boletas Privadas',
+            data: dataPrivado,
+            backgroundColor: 'rgba(75, 192, 75, 0.6)',
+            borderColor: 'rgba(75, 192, 75, 1)',
+            borderWidth: 1
+        });
+    }
 
-    // Alinear datos privados con todos los días
-    var dataPrivado = labels.map(function(day) {
-        return cantidadBoletasDiaPrivado[day] || 0; // Si no hay datos, usar 0
-    });
 
-    // Crear el gráfico apilado
     var ctx = document.getElementById('graficoBoletaslastperiod').getContext('2d');
     var graficoBoletasCombinado = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels, // Usar todos los días como etiquetas
-            datasets: [
-                {
-                    label: 'Boletas Públicas',
-                    data: dataPublico,
-                    backgroundColor: 'rgba(0, 123, 255, 0.6)', // Color azul con transparencia
-                    borderColor: '#007BFF',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Boletas Privadas',
-                    data: dataPrivado,
-                    backgroundColor: 'rgba(75, 192, 75, 0.6)', // Color verde con transparencia
-                    borderColor: 'rgba(75, 192, 75, 1)',
-                    borderWidth: 1
-                }
-            ]
+            labels: labels,
+            datasets: datasets
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    stacked: true // Apilar los valores en el eje X
+                    stacked: true
                 },
                 y: {
-                    stacked: true, // Apilar los valores en el eje Y
+                    stacked: true,
                     beginAtZero: true
                 }
             },
@@ -847,7 +752,7 @@
                         label: function(tooltipItem) {
                             var label = tooltipItem.dataset.label || '';
                             var value = tooltipItem.raw;
-                            return label + ': ' + value.toLocaleString(); // Mostrar valor formateado
+                            return label + ': ' + value.toLocaleString();
                         }
                     }
                 },
@@ -858,10 +763,11 @@
             }
         }
     });
-</script>
+        </script>
+        }
 
-
-
+        @if(Model.CantidadBoletasDiaPublico != null)
+        {
         <!--Grafico Distribución de boletas por dia último periodo público -->
         <script type="text/javascript">
 
@@ -894,7 +800,10 @@
                 }
             });
         </script>
+        }
 
+        @if(Model.CantidadBoletasDiaPrivado != null)
+        {
         <!--Grafico Distribución de boletas por dia último periodo privado -->
         <script type="text/javascript">
 
@@ -927,7 +836,10 @@
                 }
             });
         </script>
+        }
 
+        @if(Model.IngresosMensualesPublico != null)
+        {
         <!--Grafico Ingresos publicos-->
         <script type="text/javascript">
             // Formatear los periodos en formato "YYYY - MM"
@@ -1004,7 +916,10 @@
 
             });
         </script>
+        }
 
+        @if(Model.CantidadBoletasMensualesPublico != null)
+        {
         <!--Grafico Cantidad de boletas por mes publicas-->
         <script type="text/javascript">
             // Formatear los periodos en formato "YYYY - MM"
@@ -1063,6 +978,8 @@
 
             });
         </script>
+        }
+
 
         <!-- Tabla Saldos Mensuales Publicos -->
         <script type="text/javascript">
@@ -1083,26 +1000,27 @@
                         });
                     });
                 });
-            $(document).ready(function () {
-                $('#tablaSaldosMensualesPublicos').DataTable({
-                    paging: true, // Habilitar paginación
-                    pageLength: 12, // Mostrar 12 registros por página
-                    lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
-                    searching: true, // Habilitar búsqueda
-                    ordering: true, // Permitir ordenar columnas
-                    info: true, // Mostrar información del número de registros
-                    autoWidth: false, // Auto-ajuste de ancho de columnas
-                    responsive: true, // Habilitar responsividad
-                    dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
-                    buttons: [
-                        'copy', 'csv', 'excel', 'pdf' // Botones de exportación
-                    ],
-                    order: [], // Desactiva el orden automático
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
-                    }
-                });
-
+            
+                    $(document).ready(function () {
+                        $('#tablaSaldosMensualesPublicos').DataTable({
+                            paging: true, // Habilitar paginación
+                            pageLength: 12, // Mostrar 12 registros por página
+                            lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                            searching: true, // Habilitar búsqueda
+                            ordering: true, // Permitir ordenar columnas
+                            info: true, // Mostrar información del número de registros
+                            autoWidth: false, // Auto-ajuste de ancho de columnas
+                            responsive: true, // Habilitar responsividad
+                            dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                            buttons: [
+                                'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                            ],
+                            order: [], // Desactiva el orden automático
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                            }
+                        });
+                
                 $('#tablaSaldosMensualesPrivados').DataTable({
                     paging: true, // Habilitar paginación
                     pageLength: 12, // Mostrar 12 registros por página
@@ -1140,11 +1058,32 @@
                         url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
                     }
                 });
+
+                $('#tablaCirujanos').DataTable({
+                    paging: true, // Habilitar paginación
+                    pageLength: 10, // Mostrar 12 registros por página
+                    lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                    searching: true, // Habilitar búsqueda
+                    ordering: true, // Permitir ordenar columnas
+                    info: true, // Mostrar información del número de registros
+                    autoWidth: false, // Auto-ajuste de ancho de columnas
+                    responsive: true, // Habilitar responsividad
+                    dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                    ],
+                    order: [], // Desactiva el orden automático
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                    }
+                });
                 
 
             });
         </script>
 
+        @if(Model.CantidadBoletasPorMutualPublico != null)
+        {
         <!--Grafico de tortas Cantidad de Boletas por Mutual -->
           <script type="text/javascript">
     // Obtener las entidades y las cantidades de boletas
@@ -1245,9 +1184,10 @@
         chart.resize();
     });
         </script>
-
+        }
+        @if(Model.MontosProximosACobrarPublico != null)
+        {
         <!--Grafico flujos brutos proximos publicos-->
-
         <script type="text/javascript">
     // Obtener los períodos (X) y los montos por entidad (Y) del ViewModel
     var periodos = @Html.Raw(Json.Serialize(Model.MontosProximosACobrarPublico.Select(p => p.Periodo)));
@@ -1381,6 +1321,9 @@
         chart.resize();
     });
         </script>
+        }
+        @if(Model.IngresosMensualesPublico != null || Model.IngresosMensualesPrivados != null)
+        {
         <!--Grafico Ingresos mensuales historicos (publicos y privados)-->
         <script type="text/javascript">
             // Obtener los ingresos públicos y privados del ViewModel
@@ -1506,7 +1449,10 @@
             // Renderizar el gráfico
             chart.render();
         </script>
+        }
 
+        @if(Model.IngresosTotalesUSD != null)
+        {
         <!--Grafico Ingresos mensuales historicos en USD-->
         <script type="text/javascript">
     // Obtener los ingresos públicos y privados del ViewModel
@@ -1619,8 +1565,9 @@
     // Renderizar el gráfico
     chart.render();
         </script>
-
-
+        }
+        @if(Model.EdadPacientes != null)
+        {
         <!--Grafico de tortas por edad GENERAL-->
         <script type="text/javascript">
     // Obtener las edades (las claves del diccionario) y las cantidades de pacientes (los valores)
@@ -1684,9 +1631,11 @@
         chart.render();
     });
         </script>
+        }
 
-
-      <!--Grafico de tortas por mutual GENERAL-->
+        @if(Model.BoletasPorEntidadGeneral != null)
+        {
+        <!--Grafico de tortas por mutual GENERAL-->
         <script type="text/javascript">
     // Obtener las entidades y las cantidades de boletas
     var entidades = @Html.Raw(Json.Serialize(Model.BoletasPorEntidadGeneral.Keys));
@@ -1786,7 +1735,10 @@
         chart.resize();
     });
         </script>
+        }
 
+        @if(Model.BoletasPorEntidadLastPeriod != null)
+        {
         <!--Grafico de tortas por mutual LAST PERIOD-->
         <script type="text/javascript">
     // Obtener las entidades y las cantidades de boletas
@@ -1850,7 +1802,7 @@
                 },
                 title: {
                     display: true, // Mostrar el título
-                    text: 'Cantidad de boletas por Mutual (Histórico)', // Texto del título
+                    text: 'Cantidad de boletas por Mutual (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
                     font: {
                         size: 20 // Tamaño de la fuente del título
                     },
@@ -1887,7 +1839,10 @@
         chart.resize();
     });
         </script>
+        }
 
+        @if(Model.IngresosMensualesPrivados != null)
+        {
         <!--Grafico Ingresos Privados-->
         <script type="text/javascript">
             // Formatear los periodos en formato "YYYY - MM"
@@ -1964,7 +1919,9 @@
 
             });
         </script>
-
+        }
+        @if(Model.CantidadBoletasMensualesPrivado != null)
+        {
         <!--Grafico Cantidad de boletas por mes privadas-->
         <script type="text/javascript">
             // Formatear los periodos en formato "YYYY - MM"
@@ -2023,10 +1980,10 @@
 
             });
         </script>
+        }
 
-        <!-- Tabla Saldos Mensuales Publicos -->
-        
-
+        @if(Model.CantidadBoletasPorMutualPrivados != null)
+        {
         <!--Grafico de tortas Cantidad de Boletas por Mutual -->
           <script type="text/javascript">
     // Obtener las entidades y las cantidades de boletas
@@ -2127,9 +2084,11 @@
         chart.resize();
     });
         </script>
+        }
 
+        @if(Model.MontosProximosACobrarPrivado != null)
+        {
         <!--Grafico flujos brutos proximos privados-->
-
         <script type="text/javascript">
     // Obtener los períodos (X) y los montos por entidad (Y) del ViewModel
     var periodos = @Html.Raw(Json.Serialize(Model.MontosProximosACobrarPrivado.Select(p => p.Periodo)));
@@ -2263,110 +2222,12 @@
         chart.resize();
     });
         </script>
-
-        <!--Grafico de tortas Cantidad de Boletas por Cirujano -->
-          <script type="text/javascript">
-    // Obtener las entidades y las cantidades de boletas
-    var entidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorCirujanoPrivados.Keys));
-    var cantidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorCirujanoPrivados.Values));
-
-    // Calcular el total de boletas
-    var total = cantidades.reduce((a, b) => a + b, 0);
-
-    // Configurar el gráfico de torta con Chart.js
-    var ctx = document.getElementById('graficoCirujanoPrivados').getContext('2d');
-    
-    var chart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: entidades, // Etiquetas de las entidades
-            datasets: [{
-                label: 'Cantidad de cirugías',
-                data: cantidades, // Valores correspondientes a las boletas
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(255, 205, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'left',
-                     // Leyenda en la parte superior
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                           var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
-                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
-                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total de las boletas
-                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje correcto
-
-                            var label = tooltipItem.label || '';
-
-                            // Devolver el texto del tooltip con cantidad y porcentaje en negrita
-                            return `${label}: ${value} cirugias (${percentage}%)`;
-                        }
-                    }
-                },
-                title: {
-                    display: true, // Mostrar el título
-                    text: 'Cantidad de boletas por Cirujano (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
-                    font: {
-                        size: 20 // Tamaño de la fuente del título
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    }
-                }
-            },
-            onClick: function(e, elements) {
-                if (elements.length > 0) {
-                    var index = elements[0].index;
-                    var dataset = chart.data.datasets[0];
-                    
-                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
-                    if (!dataset._meta) {
-                        dataset._meta = Array(dataset.data.length).fill(false);
-                    }
-                    dataset._meta[index] = !dataset._meta[index];
-                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
-                    chart.update();
-                }
-            }
         }
-    });
 
-    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
-    window.addEventListener('resize', function() {
-        chart.resize(); // Volver a renderizar el gráfico
-    });
-
-    // Redibujar el gráfico al cargar la página completamente
-    window.addEventListener('load', function() {
-        chart.resize();
-    });
-        </script>
-
+        @if(Model.CantidadBoletasPorHospitalPrivados != null)
+        {
         <!--Grafico de tortas Cantidad de Boletas por Hospital -->
-          <script type="text/javascript">
+        <script type="text/javascript">
     // Obtener las entidades y las cantidades de boletas
     var entidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorHospitalPrivados.Keys));
     var cantidades = @Html.Raw(Json.Serialize(Model.CantidadBoletasPorHospitalPrivados.Values));
@@ -2465,120 +2326,91 @@
         chart.resize();
     });
         </script>
+        }
 
-        <!--Grafico de tortas Facturacion por Cirujano-->
-       <script type="text/javascript">
-    // Obtener las entidades y las cantidades de boletas
-    var entidades = @Html.Raw(Json.Serialize(Model.FacturacionPorCirujanoPrivados.Keys));
-    var cantidades = @Html.Raw(Json.Serialize(Model.FacturacionPorCirujanoPrivados.Values));
+        @if(Model.CantidadBoletasSemanalesPrivado != null)
+        {
+        <script type="text/javascript">
+        var cantidadBoletasSemanalesPrivado = @Html.Raw(Json.Serialize(Model.CantidadBoletasSemanalesPrivado));
 
-    // Calcular el total de boletas
-    var total = cantidades.reduce((a, b) => a + b, 0);
+        // Extraer las etiquetas (semanas) y los valores (cantidad de boletas)
+        var labels = Object.keys(cantidadBoletasSemanalesPrivado);  // Semanas
+        var data = Object.values(cantidadBoletasSemanalesPrivado);  // Cantidad de boletas
 
-    // Función para formatear números con separador de miles y decimales
-    function formatCurrency(value) {
-    return '$' + value
-        .toFixed(2) // Limita a 2 decimales
-        .replace('.', ',') // Reemplaza el punto decimal por una coma
-        .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Coloca los puntos como separadores de miles
-}
-
-    // Configurar el gráfico de torta con Chart.js
-    var ctx = document.getElementById('graficoFacturacionCirujanoPrivados').getContext('2d');
-    
-    var chart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: entidades, // Etiquetas de las entidades
-            datasets: [{
-                label: 'Facturación',
-                data: cantidades, // Valores correspondientes a las boletas
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(255, 205, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'left', // Leyenda a la izquierda
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
-                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
-                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total
-                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje
-                            
-                            var label = tooltipItem.label || '';
-                            // Devolver el texto del tooltip con formato de moneda y porcentaje
-                            return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+        // Crear el gráfico de barras horizontales
+        var ctx = document.getElementById('graficoBoletasSemanalesPrivado').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels, // Semanas (eje Y)
+                datasets: [{
+                    label: 'Cantidad de Boletas',
+                    data: data, // Valores correspondientes a cada semana
+                    backgroundColor: 'rgba(75, 192, 75, 0.6)',
+                    borderColor: 'rgba(75, 192, 75, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Hace que las barras sean horizontales
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true, // Comenzar el eje X desde 0
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Boletas'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Semanas'
                         }
                     }
                 },
-                title: {
-                    display: true, // Mostrar el título
-                    text: 'Facturación por cirujano (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
-                    font: {
-                        size: 20 // Tamaño de la fuente del título
+                plugins: {
+                    legend: {
+                        display: false // Ocultar la leyenda
                     },
-                    padding: {
-                        top: 10,
-                        bottom: 30
+                    title: {
+                        display: true,
+                        text: 'Cantidad de Boletas por Semana'
                     }
-                }
-            },
-            onClick: function(e, elements) {
-                if (elements.length > 0) {
-                    var index = elements[0].index;
-                    var dataset = chart.data.datasets[0];
-                    
-                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
-                    if (!dataset._meta) {
-                        dataset._meta = Array(dataset.data.length).fill(false);
-                    }
-                    dataset._meta[index] = !dataset._meta[index];
-                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
-                    chart.update();
                 }
             }
+        });
+        
+        </script>
         }
-    });
 
-    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
-    window.addEventListener('resize', function() {
-        chart.resize(); // Volver a renderizar el gráfico
-    });
+      <script>
+     document.addEventListener('DOMContentLoaded', () => {
+            const periodSelector = document.getElementById('periodSelector');
 
-    // Redibujar el gráfico al cargar la página completamente
-    window.addEventListener('load', function() {
-        chart.resize();
-    });
+            periodSelector.addEventListener('change', (event) => {
+                const selectedPeriod = event.target.value;
+
+                $.ajax({
+                    url: '/Home/ActualizarVistasPorPeriodo', // Acción que retorna la vista parcial
+                    type: 'POST',
+                    data: { periodo: selectedPeriod }, // Parámetro enviado al servidor
+
+                    success: function (resultado) {
+                        $('#resultContainer').html(resultado);
+
+                    },
+                    error: function () {
+                        alert('Ocurrió un error al cargar la vista parcial.');
+                    }
+                });
+            });
+        });
 </script>
 
 
+
 }
 
-@if (ViewBag.Message != null)
-{
-        <div class="alert alert-info">
-        @ViewBag.Message
-        </div>
-}
+

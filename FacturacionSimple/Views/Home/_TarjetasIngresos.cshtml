@@ -1,0 +1,61 @@
+﻿@model IndexViewModel
+
+<div class="row">
+    <!-- Tarjeta 1: Facturación bruta -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary">
+                    <span style="color: #27AE60;">
+                        $@String.Format("{0:N2}", @Model.IngresoPromedioUltimoPrivado)
+                    </span>
+                </h2>
+                <p class="card-text">Facturación bruta del último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarjeta 2: Boleta promedio -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary">
+                    <span style="color: #27AE60;">
+                        $@String.Format("{0:N2}", @Model.PromedioBoletaUltimoMesPrivados)
+                    </span>
+                </h2>
+                <p class="card-text">Boleta promedio último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Tarjeta 3: Boleta de mayor valor -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary">
+                    <span style="color: #27AE60;">
+                        $@String.Format("{0:N2}", @Model.BoletaMayorValorU3MPrivados)
+                    </span>
+                </h2>
+                <p class="card-text">Boleta de mayor valor del Último Período <b>(@Model.LastPeriod - @Model.LastYear)</b></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarjeta 4: Boleta de menor valor -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary">
+                    <span style="color: #27AE60;">
+                        $@String.Format("{0:N2}", @Model.BoletaMenorValorU3MPrivados)
+                    </span>
+                </h2>
+                <p class="card-text">Boleta de menor valor del último período <b>(@Model.LastPeriod - @Model.LastYear)</b></p>
+            </div>
+        </div>
+    </div>
+</div>

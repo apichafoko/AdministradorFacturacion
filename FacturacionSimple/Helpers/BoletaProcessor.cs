@@ -3,13 +3,13 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using ExcelDataReader;
 using FacturacionSimple.Models;
-using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
+
 using Microsoft.AspNetCore.SignalR;
 
 namespace FacturacionSimple.Helpers
 {
     public class BoletaProcessor
+    /// <summary>
     {
         private readonly IHubContext<ProgressHub> _hubContext;
 
@@ -35,19 +35,15 @@ namespace FacturacionSimple.Helpers
                     // Calcular el porcentaje de progreso
                     var porcentaje = (processedBoletas * 100) / totalBoletas;
 
-                    // Enviar actualización de progreso al cliente
-                    await _hubContext.Clients.All.SendAsync("ReceiveProgress", porcentaje);
+                    
                 }
 
-                // Enviar notificación de que el proceso ha terminado
-                await _hubContext.Clients.All.SendAsync("ReceiveProgress", 100);
+                
                 return boletas;
             }
             catch (Exception ex)
             {
-                // En caso de error, revertir la transacción
-                // Enviar notificación de que el proceso ha terminado
-                await _hubContext.Clients.All.SendAsync("ReceiveProgress", 100);
+                
                 throw; // Volver a lanzar la excepción para manejarla si es necesario
             }
         }
@@ -105,8 +101,8 @@ namespace FacturacionSimple.Helpers
                             if (int.TryParse(dia, out int diaInt) && diaInt < 10)
                             {
                                 // Si el día es menor a 10, el formato es MM/dd/yyyy
-                                mes = fechaParts[0];
-                                dia = fechaParts[1];
+                                //mes = fechaParts[0];
+                                //dia = fechaParts[1];
                             }
 
                             try
@@ -133,10 +129,13 @@ namespace FacturacionSimple.Helpers
 
         public Dictionary<string, int> CantidadBoletasDiaSemana(List<Boleta> Listado)
         {
+
+
             var lDiccionario = new Dictionary<string, int>();
 
             foreach (var boleta in Listado)
             {
+                var fecha = boleta.Fecha.ToShortDateString();
                 var diaSemana = boleta.Fecha.ToString("dddd", new CultureInfo("es-ES"));
                 if (lDiccionario.ContainsKey(diaSemana))
                 {
@@ -160,6 +159,34 @@ namespace FacturacionSimple.Helpers
             }
 
             return lDiccionarioOrdenado;
+        }
+
+
+
+        public Dictionary<string, int> CantidadBoletasDiaSemanales(List<Boleta> Listado, int lastMonth, int lastYear)
+        {
+            var lDiccionario = new Dictionary<string, int>();
+
+            foreach (var boleta in Listado)
+            {
+                if (boleta.Fecha.Month == lastMonth && boleta.Fecha.Year == lastYear)
+                {
+                    var inicioSemana = boleta.Fecha.AddDays(-(int)boleta.Fecha.DayOfWeek);
+                    var finSemana = inicioSemana.AddDays(6);
+                    var clave = $"{inicioSemana:dd/MM/yyyy} al {finSemana:dd/MM/yyyy}";
+
+                    if (lDiccionario.ContainsKey(clave))
+                    {
+                        lDiccionario[clave]++;
+                    }
+                    else
+                    {
+                        lDiccionario[clave] = 1;
+                    }
+                }
+            }
+
+            return lDiccionario;
         }
 
         public List<SaldosMensuales> GetSaldosMensuales(List<Boleta> Listado)
@@ -236,6 +263,7 @@ namespace FacturacionSimple.Helpers
 
             var boletasSinPago = boletas
                 .Where(b => b.Cobrado == 0 &&
+                    !(b.Debitado == b.Facturado) &&
                     new DateTime(b.PeriodoAnio, b.PeriodoMes, 1) >= cutoffDate)
                 .ToList();
 
@@ -258,9 +286,22 @@ namespace FacturacionSimple.Helpers
                     if (montosPorPeriodo == null)
                     {
                         montosPorPeriodo = new MontosPorPeriodo();
-                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 1:D2}";
+                        
+                        var nuevoMes = periodoGrupo.Key.PeriodoMes + 1;
+                        var nuevoAnio = periodoGrupo.Key.PeriodoAnio;
+
+                        if (nuevoMes > 12)
+                        {
+                            nuevoAnio += nuevoMes / 12;
+                            nuevoMes = nuevoMes % 12;
+                        }
+
+                        montosPorPeriodo.Periodo = $"{nuevoAnio} - {nuevoMes:D2}";
+                        
                         montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
                         montosPorPeriodos.Add(montosPorPeriodo);
+                                                
+                        
                     }
 
                     foreach (var boleta in periodoGrupo.Where(b => EntidadesMes1.Contains(b.EntidadCodigo)))
@@ -288,7 +329,18 @@ namespace FacturacionSimple.Helpers
                     if (montosPorPeriodo == null)
                     {
                         montosPorPeriodo = new MontosPorPeriodo();
-                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 2:D2}";
+                    
+                        var nuevoMes = periodoGrupo.Key.PeriodoMes + 2;
+                        var nuevoAnio = periodoGrupo.Key.PeriodoAnio;
+
+                        if (nuevoMes > 12)
+                        {
+                            nuevoAnio += nuevoMes / 12;
+                            nuevoMes = nuevoMes % 12;
+                        }
+
+                        montosPorPeriodo.Periodo = $"{nuevoAnio} - {nuevoMes:D2}";
+                        
                         montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
                         montosPorPeriodos.Add(montosPorPeriodo);
                     }
@@ -318,7 +370,17 @@ namespace FacturacionSimple.Helpers
                     if (montosPorPeriodo == null)
                     {
                         montosPorPeriodo = new MontosPorPeriodo();
-                        montosPorPeriodo.Periodo = $"{periodoGrupo.Key.PeriodoAnio} - {periodoGrupo.Key.PeriodoMes + 3:D2}";
+                        var nuevoMes = periodoGrupo.Key.PeriodoMes + 3;
+                        var nuevoAnio = periodoGrupo.Key.PeriodoAnio;
+
+                        if (nuevoMes > 12)
+                        {
+                            nuevoAnio += nuevoMes / 12;
+                            nuevoMes = nuevoMes % 12;
+                        }
+
+                        montosPorPeriodo.Periodo = $"{nuevoAnio} - {nuevoMes:D2}";
+                        
                         montosPorPeriodo.MontosPorEntidad = new Dictionary<string, double>();
                         montosPorPeriodos.Add(montosPorPeriodo);
                     }
@@ -348,7 +410,10 @@ namespace FacturacionSimple.Helpers
                     .ToDictionary(kv => kv.Key, kv => kv.Value);
             }
 
-            return montosPorPeriodos;
+            return montosPorPeriodos
+                .OrderBy(m => int.Parse(m.Periodo.Split('-')[0].Trim()))
+                .ThenBy(m => int.Parse(m.Periodo.Split('-')[1].Trim()))
+                .ToList();
         }
 
         public Dictionary<string, int> GetEdadesPromedio(List<Boleta> Listado)
@@ -439,14 +504,45 @@ namespace FacturacionSimple.Helpers
             return boletasPorHospital;
         }
 
-        internal Dictionary<string, double> GetFacturacionPorCirujano(List<Boleta> boletas)
+        internal List<ItemCirujanoDTO> GetFacturacionPorCirujano(List<Boleta> boletas)
         {
+            var totalFacturado = boletas.Sum(b => b.Facturado);
+
             var facturacionPorCirujano = boletas
                 .GroupBy(b => string.IsNullOrEmpty(b.Cirujano) ? "Desconocido" : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(b.Cirujano.ToLowerInvariant()))
-                .OrderByDescending(g => g.Sum(b => b.Facturado))
-                .ToDictionary(g => g.Key, g => Math.Round(g.Average(b => b.Facturado), 2));
+                .Select(g => new ItemCirujanoDTO
+                {
+                    Nombre = g.Key,
+                    Cantidad = g.Count(),
+                    Monto = Math.Round(g.Sum(b => b.Facturado), 2),
+                    Porcentaje = Math.Round(g.Sum(b => b.Facturado) / totalFacturado * 100, 2)
+                })
+                .OrderByDescending(item => item.Monto)
+                .ToList();
 
             return facturacionPorCirujano;
+        }
+
+        public List<string> GetPeriodosPrevios(List<Boleta> boletas, int ultimoAnio, int ultimoMes)
+        {
+
+            var ultimoPeriodoDate = new DateTime(ultimoAnio, ultimoMes, 1);
+            var periodosPrevios = boletas
+                .Select(b => new DateTime(b.PeriodoAnio, b.PeriodoMes, 1))
+                .Where(d => d <= ultimoPeriodoDate)
+                .Distinct()
+                .OrderByDescending(d => d)
+                .Select(d => d.ToString("yyyy - MM"))
+                .ToList();
+
+            return periodosPrevios;
+        }
+
+
+        public List<Boleta> GetBoletasPorPeriodo(List<Boleta> listado, string periodo)
+        {
+            var periodoDate = DateTime.ParseExact(periodo, "yyyy - MM", CultureInfo.InvariantCulture);
+            return listado.Where(b => b.PeriodoAnio == periodoDate.Year && b.PeriodoMes == periodoDate.Month).ToList();
         }
     }
 }

@@ -1,0 +1,116 @@
+﻿ <!-- Tab 2: Ultimo Periodo -->
+        <div class="tab-content" id="tab-2">
+            <h2>Datos generales último período</h2>
+            <div class="container-fluid mt-4">
+                <div class="row">
+                        <div class="col-lg-12 col-md-6 mb-4">
+                            <div class="card shadow-sm rounded border-light style="border-radius: .55rem">
+                                <div class="card-body">
+                                    <p class="card-text" style="font-style: italic;text-align: center;">
+                                        Esta sección muestra los datos tanto del sistema público como privado de tu facturación. <b><u>Esta sección toma en cuenta solo las boletas del último período del Excel.</u></b> 
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="row">
+                            <!-- Tarjeta 1 -->
+                            <div class="col-lg-6 col-md-6 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;">@Model.LastYear - @Model.LastPeriod</span></h2>
+                                        <p class="card-text">Último Período procesado</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Gráfico -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">¿Qué día de la semana del último período tuve más boletas?</h5>
+                                        <div>
+                                            <canvas id="graficoBoletaslastperiod"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- Tarjeta 1 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary">@Model.CantidadBoletasPublicas</h2>
+                                        <p class="card-text">¿Cuántas boletas fueron del sistema público?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tarjeta 2 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.CantidadBoletasPrivadas</span></h2>
+                                        <p class="card-text">¿Cuántas boletas fueron del sistema privado?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="row">
+                            <!-- Tarjeta 1 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary">$ @String.Format("{0:N2}", (Model.IngresosMensualesPublico?.Last().Value ?? 0))</h2> 
+                                        <p class="card-text">Facturación bruta público</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tarjeta 2 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;"> $ @String.Format("{0:N2}", (Model.IngresosMensualesPrivados?.Last().Value ?? 0))</span></h2>
+                                        <p class="card-text">Facturación bruta privado</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                            <!-- Tarjeta 1 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;">$ @String.Format("{0:N2}", Model.CotizacionUSDLast)</span></h2> 
+                                        <p class="card-text">Cotización dolar blue promedio del mes <b>01 - del @Model.LastPeriod - @Model.LastYear</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tarjeta 2 -->
+                            <div class="col-lg-6 col-md-12 mb-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-body">
+                                        <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;"> $ @String.Format("{0:N2}", (Model.IngresosTotalesUSD?.FirstOrDefault().Value ?? 0))</span></h2>
+                                        <p class="card-text">Facturación bruta total en USD</p>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                         <div class="row">
+                        <!-- Gráfico -->
+                            <div class="col-lg-12 col-md-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                            <canvas id="graficosBoletasEntidadLastPeriod"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+        </div>
+
+
+
+
+
+
+        

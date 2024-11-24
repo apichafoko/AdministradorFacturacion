@@ -1,0 +1,51 @@
+﻿@model IndexViewModel
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 mb-4">
+        <h3 class="mb-4">Saldos Mensuales</h3>
+        <div class="table-responsive">
+            <table id="tablaSaldosMensualesPrivados" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Porcentaje del total abonado</th>
+                        <th>Diferencia</th>
+                        <th>Importe Facturado (Bruto)</th>
+                        <th>Importe Debitado (Bruto)</th>
+                        <th>Importe Abonado (Bruto)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.SaldosHistoricosPrivados.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
+                    {
+                        <tr>
+                            <td>@item.Periodo</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span>@String.Format("{0:N2}%", item.PorcentajeCobrado)</span>
+                                    <div class="progress ms-2 w-100" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" style="width: @item.PorcentajeCobrado.ToString("N0")%; background-color: rgba(39, 174, 96, 1);" aria-valuenow="@item.PorcentajeCobrado" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @{
+                                    var importePendiente = item.ImportePendiente;
+                                    var formattedImportePendiente = Math.Round(importePendiente) == 0 
+                                        ? String.Format("{0:C}", importePendiente)
+                                        : (importePendiente < 0 
+                                            ? "+" + String.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", Math.Abs(importePendiente)) 
+                                            : "-" + String.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", importePendiente));
+                                }
+                                @formattedImportePendiente
+                            </td>
+                            <td>@String.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", item.ImporteFacturadoBruto)</td>
+                            <td>@String.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", item.ImporteDebitadoBruto)</td>
+                            <td>@String.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", item.ImporteCobradoBruto)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

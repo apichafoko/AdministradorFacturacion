@@ -22,6 +22,9 @@ namespace FacturacionSimple
         public Dictionary<string, int> CantidadBoletasDiaPublico { get; set; }
 
         public Dictionary<string, int> CantidadBoletasDiaPrivado { get; set; }
+
+        public Dictionary<string, int> CantidadBoletasSemanalesPrivado { get; set; }
+
         public double PromedioBoletaUltimoMesGeneral { get; set; }
 
         public List<SaldosMensuales> SaldosHistoricosPublicos {get;set;}
@@ -78,11 +81,11 @@ namespace FacturacionSimple
 
         public Dictionary<DateTime,int> CantidadBoletasMensualesPrivado { get; set;}
 
-        public Dictionary<string, int> CantidadBoletasPorCirujanoPrivados { get; set; }
+        
 
         public Dictionary<string, int> CantidadBoletasPorHospitalPrivados { get; set; }
 
-        public Dictionary<string, double> FacturacionPorCirujanoPrivados { get; set; }
+        public List<ItemCirujanoDTO> FacturacionPorCirujanoPrivados { get; set; }
 
         public double CantidadBoletasPagosParciales { get; set; }
         public double MontoRestantePagosParciales { get; set; }
@@ -90,6 +93,19 @@ namespace FacturacionSimple
         public double DebitosPrivados3Meses { get; set;}
         public double CantidadBoletasDebitadas3Meses { get; set; }
         public Dictionary<string,int> MutualesDebitos3Meses { get; set; }
+
+
+        public List<string> PeriodosDisponibles {get;set;}
+
+        public string PeriodoSeleccionado {get;set;}
+
+        public int SelectedMonth {get;set;}
+        public int SelectedYear {get;set;}
+
+        public SelectedPeriodViewModel SelectedPeriodVM {get;set;}
+
+        public List<Boleta> ListadoBoletasPublicas {get;set;}
+        public List<Boleta> ListadoBoletasPrivadas {get;set;}
 
     }
 }

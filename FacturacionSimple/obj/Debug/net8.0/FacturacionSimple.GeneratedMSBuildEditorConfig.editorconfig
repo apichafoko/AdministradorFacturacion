@@ -18,12 +18,56 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes = true
 build_property.MSBuildProjectDirectory = /Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple
 build_property._RazorSourceGeneratorDebug = 
 
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Cronometro Carrera/MedidorPostas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Q3Jvbm9tZXRybyBDYXJyZXJhL01lZGlkb3JQb3N0YXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/IndexBackPreDropdown.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleEJhY2tQcmVEcm9wZG93bi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/Partial_DatosPorPeriodo.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9QYXJ0aWFsX0RhdG9zUG9yUGVyaW9kby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_GraficoHospitales.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fR3JhZmljb0hvc3BpdGFsZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_GraficoMontosCobrar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fR3JhZmljb01vbnRvc0NvYnJhci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_GraficosBoletas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fR3JhZmljb3NCb2xldGFzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_GraficosIngresos.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fR3JhZmljb3NJbmdyZXNvcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_TablaCirujanos.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fVGFibGFDaXJ1amFub3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_TablaSaldosMensuales.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fVGFibGFTYWxkb3NNZW5zdWFsZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_TarjetasIngresos.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fVGFyamV0YXNJbmdyZXNvcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Home/_TarjetasPrincipales.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9fVGFyamV0YXNQcmluY2lwYWxlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/Views/Shared/Error.cshtml]

@@ -1,0 +1,22 @@
+﻿@model IndexViewModel
+
+<div class="row">
+    <!-- Tarjeta 1 -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.LastYear - @Model.LastPeriod</span></h2>
+                <p class="card-text">Último período procesado</p>
+            </div>
+        </div>
+    </div>
+    <!-- Tarjeta 2 -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title display-4 text-primary"><span style="color: #27AE60;">@Model.CantidadBoletasPrivadas</span></h2>
+                <p class="card-text">Cantidad de boletas privadas</p>
+            </div>
+        </div>
+    </div>
+</div>

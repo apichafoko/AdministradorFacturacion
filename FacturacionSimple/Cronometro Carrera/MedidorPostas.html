@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronómetro con Velocímetro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .penalty-text {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="container mt-4">
+    <h1 class="text-center">Cronómetro y Velocímetro en Tiempo Real</h1>
+
+    <!-- Preguntar la cantidad de postas -->
+    <div class="mb-4">
+        <label for="numPostas" class="form-label">Cantidad de postas:</label>
+        <input type="number" id="numPostas" class="form-control" min="1" placeholder="Ingresar cantidad de postas">
+        <button onclick="generarPostas()" class="btn btn-primary mt-2">Generar Postas</button>
+    </div>
+
+    <!-- Contenedor donde se generarán las postas dinámicamente -->
+    <div id="postasContainer" class="row"></div>
+
+    <!-- Alarma sonora -->
+    <audio id="alarmSound" src="sound.mp3" preload="auto"></audio>
+
+    <!-- Contenedor para las penalidades -->
+    <div id="penalidadesResumen" class="mt-4" style="display:none;">
+        <h2>Resumen de Penalidades</h2>
+        <ul id="penalidadesLista"></ul>
+        <p><strong>Penalidad Total:</strong> <span id="penalidadTotal" class="penalty-text"></span> segundos</p>
+    </div>
+
+    <script>
+        let timers = [];
+        let times = [];
+        let penalties = [];
+        let velocidadesObjetivo = [];
+        let penalidadesTotales = [];
+        let penalidadTotalAcumulada = 0;
+        let currentPosta = 1;
+
+        // Función que genera las postas dinámicamente según la cantidad ingresada
+        function generarPostas() {
+            const numPostas = parseInt(document.getElementById('numPostas').value);
+            const container = document.getElementById('postasContainer');
+
+            // Limpiar el contenedor antes de generar nuevas postas
+            container.innerHTML = '';
+            timers = [];
+            times = [];
+            penalties = [];
+            penalidadesTotales = [];
+            penalidadTotalAcumulada = 0;
+            currentPosta = 1;
+
+            for (let i = 1; i <= numPostas; i++) {
+                // Crear el HTML de cada posta en formato card
+                const postaHtml = `
+                    <div class="card mb-4" id="posta${i}" style="display: ${i === 1 ? 'block' : 'none'};">
+                        <div class="card-body">
+                            <h2 class="card-title">Posta ${i}</h2>
+                            <div class="row">
+                                <!-- Left Column -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="seconds${i}" class="form-label">Segundos:</label>
+                                        <input type="number" id="seconds${i}" class="form-control" placeholder="Ingresar segundos" min="0" max="59">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="distance${i}" class="form-label">Distancia (metros):</label>
+                                        <input type="number" id="distance${i}" class="form-control" placeholder="Ingresar metros">
+                                    </div>
+                                </div>
+                                <!-- Right Column -->
+                                <div class="col-md-6 text-center">
+                                    <p id="time${i}" class="display-4 text-danger">00:00</p>
+                                    <p id="penalty${i}" class="penalty-text"></p>
+                                    <div class="mb-3">
+                                        <button onclick="startStop(${i})" class="btn btn-success">Iniciar/Detener</button>
+                                        <button onclick="reset(${i})" class="btn btn-warning">Reiniciar</button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <button id="btnAtras${i}" onclick="anteriorPosta(${i})" class="btn btn-secondary" ${i === 1 ? 'style="display: none;"' : ''}>Atrás</button>
+                                        <button id="btnSiguiente${i}" onclick="siguientePosta(${i})" class="btn btn-info" ${i === numPostas ? 'style="display: none;"' : ''}>Siguiente</button>
+                                    </div>
+                                    <div class="mt-3">
+                                        <h4>Velocímetro</h4>
+                                        <p>Velocidad Actual: <span id="velocimetro${i}" class="velocimetro h4 text-success">0 km/h</span></p>
+                                        <p>Velocidad Objetivo: <span id="velocidadObjetivo${i}" class="h4 text-primary">0 km/h</span></p>
+                                        <p id="alerta${i}" class="alerta h4"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // Agregar el HTML generado al contenedor
+                container.innerHTML += postaHtml;
+
+                // Inicializar los arrays de tiempos y penalizaciones
+                timers[i - 1] = null;
+                times[i - 1] = 0;
+                penalties[i - 1] = 0;
+                penalidadesTotales[i - 1] = 0;
+                velocidadesObjetivo[i - 1] = 0;
+            }
+        }
+
+        // Función para calcular el tiempo total ingresado en minutos y segundos
+        function getTotalTimeInSeconds(posta) {
+    const seconds = parseInt(document.getElementById('seconds' + posta).value) || 0;
+    return seconds;
+}
+
+        // Función para empezar o detener el cronómetro
+        function startStop(posta) {
+            if (timers[posta - 1] === null) {
+                startTimer(posta);
+            } else {
+                clearInterval(timers[posta - 1]);
+                timers[posta - 1] = null;
+                calculatePenalty(posta);
+            }
+        }
+
+        // Iniciar el temporizador de cuenta atrás de la posta actual
+        function startTimer(posta) {
+            const expectedTime = getTotalTimeInSeconds(posta); // Obtener el tiempo estipulado en segundos
+            const distance = parseFloat(document.getElementById('distance' + posta).value); // Obtener la distancia en metros
+
+            if (!expectedTime || expectedTime <= 0 || !distance || distance <= 0) {
+                alert('Por favor, ingrese un tiempo y distancia válidos para la posta ' + posta);
+                return;
+            }
+
+            const velocidadObjetivo = ((distance / 1000) / (expectedTime / 3600)).toFixed(2); // km/h
+            document.getElementById('velocidadObjetivo' + posta).innerText = velocidadObjetivo + ' km/h';
+            velocidadesObjetivo[posta - 1] = velocidadObjetivo;
+
+            // Inicializar el tiempo restante
+            times[posta - 1] = expectedTime;
+
+            // Iniciar el cronómetro de cuenta atrás
+            timers[posta - 1] = setInterval(function() {
+                times[posta - 1] -= 1;
+                document.getElementById('time' + posta).innerText = formatTime(times[posta - 1]);
+
+                // Comprobar si faltan 5 segundos para reproducir la alarma
+                if (times[posta - 1] === 5) {
+                    playAlarm();
+                }
+
+                // Cuando el cronómetro llegue a 0
+                if (times[posta - 1] <= 0) {
+                    clearInterval(timers[posta - 1]);
+                    timers[posta - 1] = null;
+                    calculatePenalty(posta);
+
+                    // Pasar a la siguiente posta automáticamente si existe
+                    if (posta < timers.length) {
+                        siguientePosta(posta);
+                    } else {
+                        mostrarPenalidades();
+                    }
+                }
+            }, 1000);
+        }
+
+        // Función para mostrar la siguiente posta
+        function siguientePosta(posta) {
+            // Ocultar la posta actual
+            document.getElementById('posta' + posta).style.display = 'none';
+
+            // Mostrar la siguiente posta si existe
+            if (posta < timers.length) {
+                document.getElementById('posta' + (posta + 1)).style.display = 'block';
+            } else {
+                mostrarPenalidades();
+            }
+        }
+
+        // Función para mostrar la posta anterior
+        function anteriorPosta(posta) {
+            // Ocultar la posta actual
+            document.getElementById('posta' + posta).style.display = 'none';
+
+            // Mostrar la posta anterior si existe
+            if (posta > 1) {
+                document.getElementById('posta' + (posta - 1)).style.display = 'block';
+            }
+        }
+
+        function reset(posta) {
+            clearInterval(timers[posta - 1]);
+            timers[posta - 1] = null;
+            times[posta - 1] = 0;
+            penalties[posta - 1] = 0;
+            penalidadesTotales[posta - 1] = 0;
+            document.getElementById('time' + posta).innerText = '00:00';
+            document.getElementById('penalty' + posta).innerText = '';
+        }
+
+        function calculatePenalty(posta) {
+            const expectedTime = getTotalTimeInSeconds(posta);
+            const actualTime = times[posta - 1];
+            let penalty = actualTime - expectedTime; // Penalización es la diferencia entre el tiempo real y el esperado
+
+            if (penalty > 0) {
+                penalidadTotalAcumulada += penalty;
+                penalidadesTotales[posta - 1] += penalty;
+                document.getElementById('penalty' + posta).innerText = `Penalización: +${penalty} segundos`;
+            } else {
+                document.getElementById('penalty' + posta).innerText = '¡Tiempo perfecto!';
+            }
+        }
+
+        // Función para formatear el tiempo en minutos y segundos
+        function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${pad(mins)}:${pad(secs)}`;
+}
+
+function pad(num) {
+    return num.toString().padStart(2, '0');
+}
+
+        function playAlarm() {
+            const alarmSound = document.getElementById('alarmSound');
+            alarmSound.play();
+        }
+
+        // Mostrar el resumen de penalidades al finalizar todas las postas
+        function mostrarPenalidades() {
+            document.getElementById('penalidadesResumen').style.display = 'block';
+            const penalidadesLista = document.getElementById('penalidadesLista');
+            penalidadesLista.innerHTML = '';
+
+            penalidadesTotales.forEach((penalidad, index) => {
+                penalidadesLista.innerHTML += `<li>Posta ${index + 1}: ${penalidad} segundos</li>`;
+            });
+
+            document.getElementById('penalidadTotal').innerText = penalidadTotalAcumulada;
+        }
+    </script>
+</body>
+</html>
