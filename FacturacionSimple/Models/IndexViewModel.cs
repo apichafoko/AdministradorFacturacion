@@ -107,6 +107,41 @@ namespace FacturacionSimple
         public List<Boleta> ListadoBoletasPublicas {get;set;}
         public List<Boleta> ListadoBoletasPrivadas {get;set;}
 
+        public int CantidadBoletasLastPeriod {get;set;}
+
+        public double IngresosTotalesLastPeriod {get;set;}
+
+        public double IngresosTotalesUSDLastPeriod {get;set;}        
+        public List<Boleta> ListadoBoletasLastPeriod {get;set;}
+
+        public double IngresosMensualesPublicoLastPeriod {get;set;}
+        public double IngresosMensualesPrivadoLastPeriod {get;set;}
+
+        
+
+        public Dictionary<double,double> DiferenciaMejorPeriodoTotal {get;set;}
+
+        public string MejorPeriodo {get;set;}
+        public double ImporteMejorPeriodo {get;set;}
+
+        public List<Boleta> ListadoBoletasParciales {get;set;}
+        public List<Boleta> ListadoBoletasDebitadas {get;set;}
+
+
+        public List<Boleta> ListadoBoletasDebitadasLastPeriod {get;set;}
+
+
+        public String CirujanoSeleccionado {get;set;}
+        public String HospitalSeleccionado {get;set;}
+        public List<Boleta> ListadoBoletasCirujanoSeleccionado {get;set;}
+
+        public List<Boleta> ListadoBoletasHospitalSeleccionado {get;set;}
+        public List<ResumenPeriodoDTO> BoletasPorPeriodoCirujanoSeleccionado {get;set;}
+
+        public List<ResumenPeriodoDTO> BoletasPorPeriodoHospitalSeleccionado {get;set;}
+
+        public List<string> CirujanosDisponibles {get;set;}
+        public List<string> HospitalesDisponibles {get;set;}
     }
 }
 

@@ -2,7 +2,7 @@
   "Files": [
     {
       "Id": "/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/obj/Debug/net8.0/scopedcss/projectbundle/FacturacionSimple.bundle.scp.css",
-      "PackagePath": "staticwebassets/FacturacionSimple.bundle.scp.css"
+      "PackagePath": "staticwebassets/FacturacionSimple.5sj9jn5ls2.bundle.scp.css"
     },
     {
       "Id": "/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/wwwroot/css/site.css",
@@ -243,6 +243,10 @@
     {
       "Id": "/Users/urielfraidenraij_1/Projects/FacturacionAdmin/FacturacionSimple/wwwroot/lib/jquery/dist/jquery.min.map",
       "PackagePath": "staticwebassets/lib/jquery/dist/jquery.min.map"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.FacturacionSimple.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
     },
     {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.FacturacionSimple.Microsoft.AspNetCore.StaticWebAssets.props",

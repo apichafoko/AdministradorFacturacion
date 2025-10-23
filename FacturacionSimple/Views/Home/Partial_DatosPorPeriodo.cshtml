@@ -15,7 +15,7 @@
             <div class="col-lg-6 col-md-6 mb-4">
                 <div class="card text-center shadow-sm">
                     <div class="card-body">
-                        <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;">@Model.SelectedYear - @Model.SelectedMonth</span></h2>
+                        <h2 class="card-title display-4 text-primary"><span style="color: black;">@Model.SelectedYear - @Model.SelectedMonth</span></h2>
                         <p class="card-text">Período procesado</p>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
             <div class="col-lg-6 col-md-12 mb-4">
                 <div class="card text-center shadow-sm">
                     <div class="card-body">
-                        <h2 class="card-title display-4 text-primary"><span style="color: black;">@Model.SelectedPeriodVM.BoletasTotales</span></h2>
+                        <h2 class="card-title display-4 text-primary"><span style="color: black;">@Model.SelectedPeriodVM.CantidadBoletasTotales</span></h2>
                         <p class="card-text">Boletas Totales</p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
             <div class="col-lg-6 col-md-12 mb-4">
                 <div class="card text-center shadow-sm">
                     <div class="card-body">
-                        <h2 class="card-title display-4 text-primary"><span style="color: black;">@Model.SelectedPeriodVM.IngresosTotales</span></h2>
+                        <h2 class="card-title display-4 text-primary"><span style="color: black;">$ @String.Format("{0:N2}", (Model.SelectedPeriodVM.IngresosTotales))</span></h2>
                         <p class="card-text">Facturación bruta total</p>
                     </div>
                 </div>
@@ -107,6 +107,14 @@
                 <div class="card text-center shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title display-4 text-primary"><span style="color: #9B59B6;"> US$ @String.Format("{0:N2}", (Model.SelectedPeriodVM.IngresosTotalesUSD))</span></h2>
+                        @if (Model.SelectedPeriodVM.DiferenciaMejorPeriodoTotal.FirstOrDefault().Value < 0)
+                                        {
+                                            <p style="color: red;">@String.Format("{0:N2}", (decimal)Model.SelectedPeriodVM.DiferenciaMejorPeriodoTotal.FirstOrDefault().Value + "%") (@String.Format("{0:N2}", "-" + (decimal)Model.SelectedPeriodVM.DiferenciaMejorPeriodoTotal.FirstOrDefault().Key + " U$S")) con respecto al mejor período (@Model.MejorPeriodo)</p>
+                                        }
+                                        else
+                                        {
+                                            <p style="color: green;">@String.Format("{0:N2}", (decimal)Model.SelectedPeriodVM.DiferenciaMejorPeriodoTotal.FirstOrDefault().Value + "%") (@String.Format("{0:N2}", "+" + (decimal)Model.SelectedPeriodVM.DiferenciaMejorPeriodoTotal.FirstOrDefault().Key + " U$S")) con respecto al mejor período (@Model.MejorPeriodo)</p>
+                                        }
                         <p class="card-text">Facturación bruta total en USD</p>
                     </div>
                 </div>
@@ -122,6 +130,178 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body" style="width: 100%;">
+                            <canvas id="graficoHospitalesSelectedPeriod"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if(Model.SelectedPeriodVM.CantidadBoletasPrivadas > 0)
+        {
+ <div class="row">
+            <div class="col-lg-12 col-md-12 mb-4">
+                <h3 class="mb-4">Facturación por Cirujano (Período: @Model.SelectedMonth - @Model.SelectedYear)</h3>
+                <div class="table-responsive">
+                    <table id="tablaCirujanosSelected" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cirujano</th>
+                                <th>Cantidad de boletas</th>
+                                <th>Monto total facturado (bruto)</th>
+                                <th>¿Cuánto representa del total facturado?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.SelectedPeriodVM.FacturacionPorCirujanoPrivados.OrderByDescending(c => c.Porcentaje).ToList())
+                            {
+                                <tr>
+                                    <td>@item.Nombre</td>
+                                    <td>@item.Cantidad</td>
+                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Monto)</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span>@String.Format("{0:N2}%", item.Porcentaje)</span>
+                                            <div class="progress ms-2 w-100" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" style="width: @item.Porcentaje.ToString("N0")%; background-color: rgba(39, 174, 96, 1);" aria-valuenow="@item.Porcentaje" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+
+        }
+       
+        <div class="row">
+            <div class="col-lg-12 col-md-12 mb-4">
+                    <h3 class="mb-4">Boletas del Período (@Model.SelectedMonth - @Model.SelectedYear)</h3>
+                    <div class="table-responsive">
+                        <table id="tablaBoletasSelectedPeriod" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                            <thead class="table-light">
+                                <tr>
+                                        <th>Número Boleta</th>
+                                        <th>Fecha</th>
+                                        <th>Periodo</th>
+                                        <th>Mutual</th>
+                                        <th>Hospital</th>
+                                        <th>Cirujano</th>
+                                        <th>Facturado</th>
+                                        <th>Cobrado</th>
+                                        <th>Debitado</th>                                                
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.SelectedPeriodVM.ListadoBoletas.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
+                                {
+                                    <tr>
+                                        <td>@item.NumeroBoleta</td>
+                                        <td>@item.Fecha.ToShortDateString()</td>
+                                        <td>@item.PeriodoAnio - @item.PeriodoMes</td>
+                                        <td>@item.EntidadCodigo - @item.EntidadTexto</td>
+                                        <td>@item.Hospital</td>
+                                        <td>@item.Cirujano</td>
+                                        <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Facturado)</td>
+                                        <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Cobrado)</td>
+                                        <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Debitado)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+        </div>
+         <div class="row">
+            <div class="col-lg-12 col-md-12 mb-4">
+            <h2>Pagos parciales y débitos</h2>
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 mb-4">
+                                <h3 class="mb-4">Boletas con pagos parciales</h3>
+                                <div class="table-responsive">
+                                    <table id="tablaBoletasParcialesSelectedPeriod" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                                        <thead class="table-light">
+                                            <tr>
+                                                 <th>Número Boleta</th>
+                                                 <th>Fecha</th>
+                                                 <th>Periodo</th>
+                                                 <th>Mutual</th>
+                                                 <th>Hospital</th>
+                                                 <th>Cirujano</th>
+                                                 <th>Facturado</th>
+                                                 <th>Cobrado</th>
+                                                 <th>Debitado</th>
+                                                 <th>Saldo Restante</th>                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.SelectedPeriodVM.ListadoBoletasParciales.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
+                                            {
+                                                <tr>
+                                                    <td>@item.NumeroBoleta</td>
+                                                    <td>@item.Fecha.ToShortDateString()</td>
+                                                    <td>@item.PeriodoAnio - @item.PeriodoMes</td>
+                                                    <td>@item.EntidadCodigo - @item.EntidadTexto</td>
+                                                    <td>@item.Hospital</td>
+                                                    <td>@item.Cirujano</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Facturado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Cobrado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Debitado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", (item.Facturado - item.Cobrado))</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 mb-4">
+                                <h3 class="mb-4">Boletas con débitos</h3>
+                                <div class="table-responsive">
+                                    <table id="tablaBoletasDebitosSelectedPeriod" class="table table-bordered table-hover align-middle display nowrap" style="width:100%">
+                                        <thead class="table-light">
+                                            <tr>
+                                                 <th>Número Boleta</th>
+                                                 <th>Fecha</th>
+                                                 <th>Periodo</th>
+                                                 <th>Mutual</th>
+                                                 <th>Hospital</th>
+                                                 <th>Cirujano</th>
+                                                 <th>Facturado</th>
+                                                 <th>Cobrado</th>
+                                                 <th>Debitado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.SelectedPeriodVM.ListadoBoletasDebitadas.OrderByDescending(s => DateTime.Parse(s.Periodo)).ToList())
+                                            {
+                                                <tr>
+                                                    <td>@item.NumeroBoleta</td>
+                                                    <td>@item.Fecha.ToShortDateString()</td>
+                                                    <td>@item.PeriodoAnio - @item.PeriodoMes</td>
+                                                    <td>@item.EntidadCodigo - @item.EntidadTexto</td>
+                                                    <td>@item.Hospital</td>
+                                                    <td>@item.Cirujano</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Facturado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Cobrado)</td>
+                                                    <td>@String.Format(new System.Globalization.CultureInfo("es-AR"),"{0:C}", item.Debitado)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+         </div>
+        </div>
+
     
     <script type='text/javascript'>
 // Obtener las entidades y las cantidades de boletas
@@ -304,6 +484,188 @@
     });
         </script>
         }
+
+    <script type="text/javascript">
+    // Obtener las entidades y las cantidades de boletas
+    var entidades = @Html.Raw(Json.Serialize(Model.SelectedPeriodVM.CantidadBoletasPorHospital.Keys));
+    var cantidades = @Html.Raw(Json.Serialize(Model.SelectedPeriodVM.CantidadBoletasPorHospital.Values));
+
+    // Calcular el total de boletas
+    var total = cantidades.reduce((a, b) => a + b, 0);
+
+    // Configurar el gráfico de torta con Chart.js
+    var ctx = document.getElementById('graficoHospitalesSelectedPeriod').getContext('2d');
+    
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: entidades, // Etiquetas de las entidades
+            datasets: [{
+                label: 'Cantidad de boletas',
+                data: cantidades, // Valores correspondientes a las boletas
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 205, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'left',
+                     // Leyenda en la parte superior
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                           var dataset = tooltipItem.chart.data.datasets[0]; // Obtener el dataset
+                            var value = dataset.data[tooltipItem.dataIndex]; // Obtener el valor correcto usando el índice
+                            var total = dataset.data.reduce((a, b) => a + b, 0); // Calcular el total de las boletas
+                            var percentage = ((value / total) * 100).toFixed(2); // Calcular el porcentaje correcto
+
+                            var label = tooltipItem.label || '';
+
+                            // Devolver el texto del tooltip con cantidad y porcentaje en negrita
+                            return `${label}: ${value} cirugias (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true, // Mostrar el título
+                    text: 'Cantidad de boletas por Hospital (Último período @Model.LastYear - @Model.LastPeriod)', // Texto del título
+                    font: {
+                        size: 20 // Tamaño de la fuente del título
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            },
+            onClick: function(e, elements) {
+                if (elements.length > 0) {
+                    var index = elements[0].index;
+                    var dataset = chart.data.datasets[0];
+                    
+                    // "Explotar" la porción haciendo que su tamaño aumente temporalmente
+                    if (!dataset._meta) {
+                        dataset._meta = Array(dataset.data.length).fill(false);
+                    }
+                    dataset._meta[index] = !dataset._meta[index];
+                    dataset.borderWidth = dataset._meta.map(v => v ? 4 : 1); // Aumentar borde si está explotada
+                    chart.update();
+                }
+            }
+        }
+    });
+
+    // Redibujar el gráfico cuando la ventana se redimensiona o al cargar
+    window.addEventListener('resize', function() {
+        chart.resize(); // Volver a renderizar el gráfico
+    });
+
+    // Redibujar el gráfico al cargar la página completamente
+    window.addEventListener('load', function() {
+        chart.resize();
+    });
+        </script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+                        $('#tablaCirujanosSelected').DataTable({
+                            paging: true, // Habilitar paginación
+                            pageLength: 10, // Mostrar 12 registros por página
+                            lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                            searching: true, // Habilitar búsqueda
+                            ordering: true, // Permitir ordenar columnas
+                            info: true, // Mostrar información del número de registros
+                            autoWidth: false, // Auto-ajuste de ancho de columnas
+                            responsive: true, // Habilitar responsividad
+                            dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                            buttons: [
+                                'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                            ],
+                            order: [], // Desactiva el orden automático
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                            }
+                        });
+
+                        $('#tablaBoletasSelectedPeriod').DataTable({
+                            paging: true, // Habilitar paginación
+                            pageLength: 50, // Mostrar 12 registros por página
+                            lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                            searching: true, // Habilitar búsqueda
+                            ordering: true, // Permitir ordenar columnas
+                            info: true, // Mostrar información del número de registros
+                            autoWidth: false, // Auto-ajuste de ancho de columnas
+                            responsive: true, // Habilitar responsividad
+                            dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                            buttons: [
+                                'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                            ],
+                            order: [], // Desactiva el orden automático
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                            }
+                        });
+
+
+                        $('#tablaBoletasParcialesSelectedPeriod').DataTable({
+                            paging: true, // Habilitar paginación
+                            pageLength: 50, // Mostrar 12 registros por página
+                            lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                            searching: true, // Habilitar búsqueda
+                            ordering: true, // Permitir ordenar columnas
+                            info: true, // Mostrar información del número de registros
+                            autoWidth: false, // Auto-ajuste de ancho de columnas
+                            responsive: true, // Habilitar responsividad
+                            dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                            buttons: [
+                                'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                            ],
+                            order: [], // Desactiva el orden automático
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                            }
+                        });
+
+                        $('#tablaBoletasDebitosSelectedPeriod').DataTable({
+                            paging: true, // Habilitar paginación
+                            pageLength: 50, // Mostrar 12 registros por página
+                            lengthChange: true, // Permitir al usuario cambiar la cantidad de registros
+                            searching: true, // Habilitar búsqueda
+                            ordering: true, // Permitir ordenar columnas
+                            info: true, // Mostrar información del número de registros
+                            autoWidth: false, // Auto-ajuste de ancho de columnas
+                            responsive: true, // Habilitar responsividad
+                            dom: 'Bfrtip', // Elementos a incluir (B=botones, f=buscador, r=progreso, t=tabla, i=información, p=paginación)
+                            buttons: [
+                                'copy', 'csv', 'excel', 'pdf' // Botones de exportación
+                            ],
+                            order: [], // Desactiva el orden automático
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json' // Cargar traducción en español
+                            }
+                        });
+            
+            });
+    </script>
 
  
 

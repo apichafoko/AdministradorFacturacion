@@ -15,8 +15,6 @@ public class SelectedPeriodViewModel
 
         public double IngresoPromedioBrutoPublico { get; set; }
 
-        public Dictionary<string, int> CantidadBoletasPorHospitalPublico { get; set; }
-
     
         public Dictionary<string, int> CantidadBoletasPorMutualPublico { get; set; }
         //Privado
@@ -38,7 +36,7 @@ public class SelectedPeriodViewModel
 
         public Dictionary<string, int> CantidadBoletasPorMutualPrivados { get; set; }
 
-        public Dictionary<string, int> CantidadBoletasPorHospitalPrivados { get; set; }
+        public Dictionary<string, int> CantidadBoletasPorHospital { get; set; }
 
         public List<ItemCirujanoDTO> FacturacionPorCirujanoPrivados { get; set; }
 
@@ -56,6 +54,17 @@ public class SelectedPeriodViewModel
         public int BoletasTotales { get; set; }
 
         public double IngresosTotales {get;set;}
+
+        public int CantidadBoletasTotales {get;set;}
+
+        public List<Boleta> ListadoBoletas {get;set;}
+
+        public Dictionary<double,double> DiferenciaMejorPeriodoTotal {get;set;}
+
+
+        public List<Boleta> ListadoBoletasParciales {get;set;}
+        public List<Boleta> ListadoBoletasDebitadas {get;set;}
+
 
 
 

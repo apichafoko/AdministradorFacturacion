@@ -8,8 +8,20 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace FacturacionSimple.Helpers
 {
-    public class BoletaProcessor
     /// <summary>
+    /// Excepción personalizada para errores de formato en celdas de Excel
+    /// </summary>
+    public class ExcelFormatException : Exception
+    {
+        public List<string> CeldasProblematicas { get; set; } = new List<string>();
+
+        public ExcelFormatException(string message, List<string> celdas) : base(message)
+        {
+            CeldasProblematicas = celdas;
+        }
+    }
+
+    public class BoletaProcessor
     {
         private readonly IHubContext<ProgressHub> _hubContext;
 
@@ -20,37 +32,31 @@ namespace FacturacionSimple.Helpers
 
         public async Task<List<Boleta>> ProcesarArchivo(string filePath)
         {
-            var boletas = LeerBoletasDesdeArchivo(filePath);
-
-            int totalBoletas = boletas.Count;
-            int processedBoletas = 0;
-
             try
             {
-                foreach (var boleta in boletas)
-                {
-                    // Incrementar boletas procesadas
-                    processedBoletas++;
+                // Leer las boletas de manera eficiente
+                var boletas = await Task.Run(() => LeerBoletasDesdeArchivo(filePath));
 
-                    // Calcular el porcentaje de progreso
-                    var porcentaje = (processedBoletas * 100) / totalBoletas;
+                // Enviar notificación de progreso final
+                await _hubContext.Clients.All.SendAsync("UpdateProgress", 100);
 
-                    
-                }
-
-                
                 return boletas;
             }
             catch (Exception ex)
             {
-                
-                throw; // Volver a lanzar la excepción para manejarla si es necesario
+                // Log del error y re-lanzar
+                throw;
             }
         }
 
         private List<Boleta> LeerBoletasDesdeArchivo(string filePath)
         {
-            var boletas = new List<Boleta>();
+            // Pre-allocar capacidad estimada para mejor performance con archivos grandes
+            var boletas = new List<Boleta>(30000);
+            int rowCount = 0;
+            int progressInterval = 1000; // Reportar progreso cada 1000 filas
+            int lastProgressReported = 0;
+            var celdasProblematicas = new List<string>(); // Lista de celdas con formato incorrecto
 
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
             {
@@ -59,22 +65,69 @@ namespace FacturacionSimple.Helpers
                     // Leer el archivo fila por fila
                     while (reader.Read())
                     {
+                        rowCount++;
+
                         if (reader.Depth > 2) // Saltar la cabecera
                         {
+                            // Omitir filas que contengan la cabecera completa o cualquiera de sus columnas
+                            var rawValues = Enumerable.Range(0, reader.FieldCount)
+                                .Select(i => reader.GetValue(i)?.ToString()?.Trim() ?? string.Empty)
+                                .ToArray();
+
+                            string[] headerCandidates = new[]
+                            {
+                                "Nro / Nombre del Socio","Boleta","Nro / Nombre de Mutual","Fec.Boleta",
+                                "Periodo","Nro / Nombre de Hospital","Nombre de Paciente","NumAfiliado",
+                                "Edad","Cirujano","Facturado","Cobrado","Debitado"
+                            };
+
+                            string Normalize(string s) =>
+                                new string((s ?? string.Empty)
+                                    .Where(c => !char.IsWhiteSpace(c) && c != '.' && c != '/' && c != '-' && c != '\t')
+                                    .ToArray())
+                                .ToLowerInvariant();
+
+                            var normalizedRow = string.Concat(rawValues.Select(Normalize));
+                            var normalizedHeaders = headerCandidates.Select(Normalize).ToArray();
+
+                            // Si la fila contiene cualquiera de las cabeceras normalizadas, saltarla
+                            if (normalizedHeaders.Any(h => !string.IsNullOrEmpty(h) && normalizedRow.Contains(h)))
+                            {
+                                continue;
+                            }
+
+                            // Verificar si la fila está completamente vacía
+                            bool isRowEmpty = rawValues.All(string.IsNullOrWhiteSpace);
+                            if (isRowEmpty)
+                            {
+                                continue; // Saltar filas vacías
+                            }
+
+                            // Verificar si las columnas críticas tienen valores
+                            var numeroBoleta = reader.GetValue(1);
+                            var fechaBoletaValue = reader.GetValue(3);
+                            var periodo = reader.GetValue(4);
+
+                            // Si faltan datos críticos, saltar la fila
+                            if (numeroBoleta == null || fechaBoletaValue == null || periodo == null)
+                            {
+                                continue;
+                            }
+
                             var lBoleta = new Boleta();
 
-                            lBoleta.NumeroBoleta = Convert.ToInt64(reader.GetValue(1));
+                            lBoleta.NumeroBoleta = Convert.ToInt64(numeroBoleta);
                             lBoleta.EntidadTexto = reader.GetValue(2)?.ToString();
                             lBoleta.Periodo = reader.GetValue(4)?.ToString();
                             lBoleta.PeriodoMes = Convert.ToDateTime(lBoleta.Periodo).Month;
                             lBoleta.PeriodoAnio = Convert.ToDateTime(lBoleta.Periodo).Year;
 
                             lBoleta.Hospital = reader.GetValue(5)?.ToString();
-                            lBoleta.Edad = Convert.ToInt32(reader.GetValue(8)?.ToString());
+                            lBoleta.Edad = SafeParseInt(reader.GetValue(8), rowCount, "I", ref celdasProblematicas);
                             lBoleta.Cirujano = reader.GetValue(9)?.ToString();
-                            lBoleta.Facturado = reader.GetValue(10) != null ? Convert.ToDouble(reader.GetValue(10).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
-                            lBoleta.Cobrado = reader.GetValue(11) != null ? Convert.ToDouble(reader.GetValue(11).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
-                            lBoleta.Debitado = reader.GetValue(12) != null ? Convert.ToDouble(reader.GetValue(12).ToString().Replace(",", "."), CultureInfo.InvariantCulture) : 0;
+                            lBoleta.Facturado = SafeParseDouble(reader.GetValue(10), rowCount, "K", ref celdasProblematicas);
+                            lBoleta.Cobrado = SafeParseDouble(reader.GetValue(11), rowCount, "L", ref celdasProblematicas);
+                            lBoleta.Debitado = SafeParseDouble(reader.GetValue(12), rowCount, "M", ref celdasProblematicas);
                             lBoleta.Saldo = lBoleta.Facturado - (lBoleta.Cobrado + lBoleta.Debitado);
 
                             var parts = lBoleta.EntidadTexto?.Split('/') ?? Array.Empty<string>();
@@ -116,12 +169,28 @@ namespace FacturacionSimple.Helpers
                                 throw new FormatException($"La fecha '{dia}/{mes}/{anio}' no es válida.");
                             }
 
-
-
                             boletas.Add(lBoleta);
+
+                            // Reportar progreso cada 1000 filas procesadas para no saturar SignalR
+                            if (boletas.Count - lastProgressReported >= progressInterval)
+                            {
+                                lastProgressReported = boletas.Count;
+                                // Progreso estimado basado en filas procesadas
+                                var progress = Math.Min(95, (boletas.Count * 95) / 30000); // Máximo 95% durante lectura
+                                _hubContext.Clients.All.SendAsync("UpdateProgress", progress).Wait();
+                            }
                         }
                     }
                 }
+            }
+
+            // Si hay celdas con formato incorrecto, lanzar excepción
+            if (celdasProblematicas.Any())
+            {
+                throw new ExcelFormatException(
+                    "El archivo Excel tiene celdas con formato incorrecto",
+                    celdasProblematicas
+                );
             }
 
             return boletas;
@@ -375,6 +444,7 @@ namespace FacturacionSimple.Helpers
 
                         if (nuevoMes > 12)
                         {
+                            
                             nuevoAnio += nuevoMes / 12;
                             nuevoMes = nuevoMes % 12;
                         }
@@ -403,12 +473,39 @@ namespace FacturacionSimple.Helpers
             }
 
             // Ordenar los MontosPorEntidad por el valor dentro de cada periodo
+            var periodosUnicos = new Dictionary<string, MontosPorPeriodo>();
+
             foreach (var montosPorPeriodo in montosPorPeriodos)
+            {
+                if (periodosUnicos.ContainsKey(montosPorPeriodo.Periodo))
+                {
+                    var existente = periodosUnicos[montosPorPeriodo.Periodo];
+                    foreach (var kv in montosPorPeriodo.MontosPorEntidad)
+                    {
+                        if (existente.MontosPorEntidad.ContainsKey(kv.Key))
+                        {
+                            existente.MontosPorEntidad[kv.Key] += kv.Value;
+                        }
+                        else
+                        {
+                            existente.MontosPorEntidad[kv.Key] = kv.Value;
+                        }
+                    }
+                }
+                else
+                {
+                    periodosUnicos[montosPorPeriodo.Periodo] = montosPorPeriodo;
+                }
+            }
+
+            foreach (var montosPorPeriodo in periodosUnicos.Values)
             {
                 montosPorPeriodo.MontosPorEntidad = montosPorPeriodo.MontosPorEntidad
                     .OrderByDescending(kv => kv.Value)
                     .ToDictionary(kv => kv.Key, kv => kv.Value);
             }
+
+            montosPorPeriodos = periodosUnicos.Values.ToList();
 
             return montosPorPeriodos
                 .OrderBy(m => int.Parse(m.Periodo.Split('-')[0].Trim()))
@@ -543,6 +640,117 @@ namespace FacturacionSimple.Helpers
         {
             var periodoDate = DateTime.ParseExact(periodo, "yyyy - MM", CultureInfo.InvariantCulture);
             return listado.Where(b => b.PeriodoAnio == periodoDate.Year && b.PeriodoMes == periodoDate.Month).ToList();
+        }
+
+
+         public List<Boleta> GetBoletasPorCirujano(List<Boleta> listado, string Cirujano)
+        {
+            return listado.Where(b => string.Equals(b.Cirujano?.ToUpperInvariant(), Cirujano.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+
+         public List<Boleta> GetBoletasPorHospital(List<Boleta> listado, string Hospital)
+        {
+            return listado.Where(b => string.Equals(b.Hospital?.ToUpperInvariant(), Hospital.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+
+        public Dictionary<double, double> GetDiferenciaMejorPeriodo(double mejorPeriodo, double importeUSD)
+        {
+            var diferencia = (importeUSD - mejorPeriodo) / mejorPeriodo * 100;
+            var valorAbsolutoDiferencia = Math.Abs(importeUSD - mejorPeriodo);
+
+            return new Dictionary<double, double> { { valorAbsolutoDiferencia, Math.Round(diferencia, 2) } };
+        }
+
+        public Dictionary<string,double> GetMejorPeriodo(Dictionary<DateTime,double> Ingresos)
+        {
+            var mejorPeriodo = Ingresos.OrderByDescending(i => i.Value).FirstOrDefault();
+            return new Dictionary<string, double> { { mejorPeriodo.Key.ToString("yyyy-MM"), Math.Abs(mejorPeriodo.Value) } };
+        }
+
+        public List<Boleta> GetBoletasParciales(List<Boleta> boletas)
+        {
+            return boletas.Where(b => b.Cobrado > 0 && b.Cobrado < b.Facturado && (b.Debitado == 0 || b.Debitado == null)).ToList();
+        }
+
+        public List<Boleta> GetBoletasConDebitos(List<Boleta> boletas)
+        {
+            return boletas.Where(b => b.Debitado != 0 && b.Debitado != null).ToList();
+        }
+
+        /// <summary>
+        /// Convierte un valor de celda Excel a double de forma segura.
+        /// Maneja casos donde la celda está mal formateada como fecha.
+        /// </summary>
+        private static double SafeParseDouble(object cellValue, int rowNumber, string columnLetter, ref List<string> celdasProblematicas)
+        {
+            if (cellValue == null)
+                return 0;
+
+            // Si ya es un número, devolverlo directamente
+            if (cellValue is double d)
+                return d;
+            if (cellValue is int i)
+                return i;
+            if (cellValue is decimal dec)
+                return (double)dec;
+
+            var stringValue = cellValue.ToString()?.Trim();
+            if (string.IsNullOrEmpty(stringValue))
+                return 0;
+
+            // Intentar parsear como número con formato estándar
+            stringValue = stringValue.Replace(",", ".");
+            if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+                return result;
+
+            // Si contiene "/" o "a. m." o "p. m.", probablemente sea una fecha mal formateada
+            if (stringValue.Contains("/") || stringValue.Contains("a. m.") || stringValue.Contains("p. m."))
+            {
+                var cellReference = $"{columnLetter}{rowNumber}";
+                celdasProblematicas.Add($"{cellReference} (tiene formato Fecha, debería ser Número)");
+                return 0;
+            }
+
+            // Si nada funciona, registrar como problemática
+            var cellRef = $"{columnLetter}{rowNumber}";
+            celdasProblematicas.Add($"{cellRef} (valor '{stringValue}' no válido)");
+            return 0;
+        }
+
+        /// <summary>
+        /// Convierte un valor de celda Excel a int de forma segura.
+        /// </summary>
+        private static int SafeParseInt(object cellValue, int rowNumber, string columnLetter, ref List<string> celdasProblematicas)
+        {
+            if (cellValue == null)
+                return 0;
+
+            // Si ya es un número, devolverlo directamente
+            if (cellValue is int i)
+                return i;
+            if (cellValue is double d)
+                return (int)d;
+            if (cellValue is decimal dec)
+                return (int)dec;
+
+            var stringValue = cellValue.ToString()?.Trim();
+            if (string.IsNullOrEmpty(stringValue))
+                return 0;
+
+            // Intentar parsear como entero
+            if (int.TryParse(stringValue, NumberStyles.Any, CultureInfo.InvariantCulture, out int result))
+                return result;
+
+            // Si contiene punto decimal, intentar parsear como double y redondear
+            if (double.TryParse(stringValue.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double dResult))
+                return (int)dResult;
+
+            // Registrar como problemática
+            var cellRef = $"{columnLetter}{rowNumber}";
+            celdasProblematicas.Add($"{cellRef} (valor '{stringValue}' no válido para edad)");
+            return 0;
         }
     }
 }
