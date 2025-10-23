@@ -32,21 +32,14 @@ namespace FacturacionSimple.Helpers
 
         public async Task<List<Boleta>> ProcesarArchivo(string filePath)
         {
-            try
-            {
-                // Leer las boletas de manera eficiente
-                var boletas = await Task.Run(() => LeerBoletasDesdeArchivo(filePath));
+            // Leer las boletas de manera eficiente
+            // NO usar Task.Run para que las excepciones se propaguen correctamente
+            var boletas = LeerBoletasDesdeArchivo(filePath);
 
-                // Enviar notificación de progreso final
-                await _hubContext.Clients.All.SendAsync("UpdateProgress", 100);
+            // Enviar notificación de progreso final
+            await _hubContext.Clients.All.SendAsync("UpdateProgress", 100);
 
-                return boletas;
-            }
-            catch (Exception ex)
-            {
-                // Log del error y re-lanzar
-                throw;
-            }
+            return boletas;
         }
 
         private List<Boleta> LeerBoletasDesdeArchivo(string filePath)
